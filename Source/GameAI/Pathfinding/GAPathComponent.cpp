@@ -13,7 +13,6 @@ UGAPathComponent::UGAPathComponent(const FObjectInitializer& ObjectInitializer)
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-
 const AGAGridActor* UGAPathComponent::GetGridActor() const
 {
 	if (GridActor.Get())
@@ -290,6 +289,13 @@ EGAPathState UGAPathComponent::AStar(const FVector& StartPoint, TArray<FPathStep
 }
 
 EGAPathState UGAPathComponent::SmoothPath(
+	// Assignment 2 Part 4: smooth the path
+	// High level description from the lecture:
+	// * Trace to each subsequent step until you collide
+	// * Back up one step (to the last clear one)
+	// * Add that cell to your smoothed step
+	// * Start again from there
+
     const FVector& StartPoint,
     const TArray<FPathStep>& UnsmoothedSteps,
     TArray<FPathStep>& SmoothedStepsOut) const
@@ -367,7 +373,7 @@ EGAPathState UGAPathComponent::SmoothPath(
         return true;
     };
 
-    // --- Build a cell list: [StartCell, ... path cells ... GoalCell] ---
+    // Build a cell list: [StartCell, ... path cells ... GoalCell] 
     const FCellRef StartCell = Grid->GetCellRef(StartPoint, /*bClamp=*/false);
     if (!StartCell.IsValid() || !IsTraversable(StartCell))
     {
@@ -392,7 +398,7 @@ EGAPathState UGAPathComponent::SmoothPath(
         Cells.Add(Step.CellRef);
     }
 
-    // --- Smoothing: greedy "farthest visible" ---
+    // Smoothing: greedy "farthest visible" 
     int32 i = 0; // index of current anchor in Cells
     while (i < Cells.Num() - 1)
     {
@@ -407,7 +413,6 @@ EGAPathState UGAPathComponent::SmoothPath(
             }
             else
             {
-                // once it collides, further j are very likely blocked
                 break;
             }
         }
@@ -427,22 +432,6 @@ EGAPathState UGAPathComponent::SmoothPath(
     return GAPS_Active;
 }
 
-//EGAPathState UGAPathComponent::SmoothPath(const FVector& StartPoint, const TArray<FPathStep>& UnsmoothedSteps, TArray<FPathStep>& SmoothedStepsOut) const
-//{
-	// Assignment 2 Part 4: smooth the path
-	// High level description from the lecture:
-	// * Trace to each subsequent step until you collide
-	// * Back up one step (to the last clear one)
-	// * Add that cell to your smoothed step
-	// * Start again from there
-
-	//SmoothedStepsOut = UnsmoothedSteps;
-
-	// HINT: make sure you return the correct status, based on whether you succeeded to find a path or not.
-	// See the comment in GAPathComponent above the EGAPathState enum
-	//return GAPS_Active;
-//}
-
 void UGAPathComponent::FollowPath()
 {
 	AActor* Owner = GetOwnerPawn();
@@ -456,7 +445,7 @@ void UGAPathComponent::FollowPath()
 	check(State == GAPS_Active);
 	check(Steps.Num() > 0);
 	
-	// Always follow the first step, assuming that we are refreshing the whole path every tick
+	// Always follow the first step
 	FVector V = Steps[0].Point - StartPoint;
 	V.Normalize();
 
@@ -466,7 +455,6 @@ void UGAPathComponent::FollowPath()
 		MovementComponent->RequestPathMove(V);
 	}
 }
-
 
 EGAPathState UGAPathComponent::SetDestination(const FVector &DestinationPoint)
 {
