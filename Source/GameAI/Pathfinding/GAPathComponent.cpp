@@ -123,6 +123,18 @@ EGAPathState UGAPathComponent::RefreshPath()
 
 EGAPathState UGAPathComponent::AStar(const FVector& StartPoint, TArray<FPathStep>& StepsOut) const
 {
+	// Assignment 2 Part3: replace this with an A* search!
+	// HINT 1: you made need a heap structure. A TArray can be accessed as a heap -- just add/remove elements using
+	// the TArray::HeapPush() and TArray::HeapPop() methods.
+	// Note that whatever you push or pop needs to implement the 'less than' operator (operator<)
+	// HINT 2: UE has some useful flag testing function. For example you can test for traversability by doing this:
+	// ECellData Flags = Grid->GetCellData(CellRef);
+	// bool bIsCellTraversable = EnumHasAllFlags(Flags, ECellData::CellDataTraversable)
+	//	StepsOut.SetNum(1);
+	//	StepsOut[0].Set(Destination, DestinationCell);
+
+	// HINT 3: make sure you return the correct status, based on whether you succeeded to find a path or not.
+	// See the comment in GAPathComponent above the EGAPathState enum
     StepsOut.Reset();
 
     const AGAGridActor* Grid = GetGridActor();
@@ -221,17 +233,12 @@ EGAPathState UGAPathComponent::AStar(const FVector& StartPoint, TArray<FPathStep
     {
         FOpenNode CurrentNode;
         OpenHeap.HeapPop(CurrentNode);
-
         const FCellRef Current = CurrentNode.Cell;
-
         const float* BestG = GScore.Find(Current);
-        if (!BestG) continue;
     	
+        if (!BestG) continue;
         if (CurrentNode.G > *BestG) continue;
-
-        // already processed
-        if (Closed.Contains(Current)) continue;
-
+    	if (Closed.Contains(Current)) continue;
         if (Current == GoalCell)
         {
             bFound = true;
@@ -260,10 +267,6 @@ EGAPathState UGAPathComponent::AStar(const FVector& StartPoint, TArray<FPathStep
         while (!(Cur == StartCell))
         {
             FCellRef* Parent = CameFrom.Find(Cur);
-            if (!Parent)
-            {
-                return GAPS_Invalid; 
-            }
             Cur = *Parent;
             CellPath.Add(Cur);
         }
@@ -286,25 +289,6 @@ EGAPathState UGAPathComponent::AStar(const FVector& StartPoint, TArray<FPathStep
     return GAPS_Active;
 }
 
-//EGAPathState UGAPathComponent::AStar(const FVector& StartPoint, TArray<FPathStep>& StepsOut) const
-//{
-//	const AGAGridActor* Grid = GetGridActor();
-
-	// Assignment 2 Part3: replace this with an A* search!
-	// HINT 1: you made need a heap structure. A TArray can be accessed as a heap -- just add/remove elements using
-	// the TArray::HeapPush() and TArray::HeapPop() methods.
-	// Note that whatever you push or pop needs to implement the 'less than' operator (operator<)
-	// HINT 2: UE has some useful flag testing function. For example you can test for traversability by doing this:
-	// ECellData Flags = Grid->GetCellData(CellRef);
-	// bool bIsCellTraversable = EnumHasAllFlags(Flags, ECellData::CellDataTraversable)
-//	StepsOut.SetNum(1);
-//	StepsOut[0].Set(Destination, DestinationCell);
-
-	// HINT 3: make sure you return the correct status, based on whether you succeeded to find a path or not.
-	// See the comment in GAPathComponent above the EGAPathState enum
-//	return GAPS_Active;
-//}
-
 EGAPathState UGAPathComponent::SmoothPath(
     const FVector& StartPoint,
     const TArray<FPathStep>& UnsmoothedSteps,
@@ -324,12 +308,34 @@ EGAPathState UGAPathComponent::SmoothPath(
         if (!Grid->IsCellRefInBounds(Cell)) return false;
         return EnumHasAllFlags(Grid->GetCellData(Cell), ECellData::CellDataTraversable);
     };
+	
+	// clearance-aware traversability (1-cell padding)
+	auto IsTraversableWithClearance = [&](const FCellRef& Cell) -> bool
+	{
+		// center cell must be traversable
+		if (!IsTraversable(Cell)) return false;
 
+		// 1-cell clearance around it (8-neighborhood)
+		// (prevents smoothing from cutting corners too close to obstacles)
+		for (int dx = -1; dx <= 1; ++dx)
+		{
+			for (int dy = -1; dy <= 1; ++dy)
+			{
+				const FCellRef N(Cell.X + dx, Cell.Y + dy);
+				if (!IsTraversable(N))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	};
+	
     // line trace: walk cells from A to B (inclusive) and ensure all traversable.
     auto LineTraceCells = [&](const FCellRef& A, const FCellRef& B) -> bool
     {
         if (!A.IsValid() || !B.IsValid()) return false;
-        if (!IsTraversable(A) || !IsTraversable(B)) return false;
+    	if (!IsTraversableWithClearance(A) || !IsTraversableWithClearance(B)) return false;
 
         int x0 = A.X, y0 = A.Y;
         int x1 = B.X, y1 = B.Y;
@@ -342,11 +348,11 @@ EGAPathState UGAPathComponent::SmoothPath(
 
         while (true)
         {
-            FCellRef C(x0, y0);
-            if (!IsTraversable(C))
-            {
-                return false;
-            }
+        	FCellRef C(x0, y0);
+        	if (!IsTraversableWithClearance(C))
+        	{
+        		return false;
+        	}
 
             if (x0 == x1 && y0 == y1)
             {
