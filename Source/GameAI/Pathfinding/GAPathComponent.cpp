@@ -64,10 +64,23 @@ APawn* UGAPathComponent::GetOwnerPawn()
 
 void UGAPathComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+	if (GetOwnerPawn() == NULL)
+	{
+		return;
+	}
+
+	bool Valid = false;
 	if (bDestinationValid)
 	{
 		RefreshPath();
-
+		Valid = true;
+	}
+	else if (bDistanceMapPathValid)
+	{
+		Valid = true;
+	}
+	if (Valid)
+	{
 		if (State == GAPS_Active)
 		{
 			FollowPath();
