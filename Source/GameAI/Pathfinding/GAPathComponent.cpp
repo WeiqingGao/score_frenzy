@@ -301,6 +301,34 @@ EGAPathState UGAPathComponent::AStar(const FVector& StartPoint, TArray<FPathStep
     return GAPS_Active;
 }
 
+bool UGAPathComponent::Dijkstra(const FVector& StartPoint, FGAGridMap& DistanceMapOut) const
+{
+	// Assignment 3 Part 3-1: implement Dijkstra's algorithm to fill out the distance map
+	return false;
+}
+
+bool UGAPathComponent::BuidPathFromDistanceMap(const FVector& StartPoint, const FCellRef& StartCellRef, const FGAGridMap& DistanceMap)
+{
+	bDistanceMapPathValid = false;
+
+	// Assignment 3 Part 3-2: reconstruct a path from the distance map
+
+	// Remember to smooth the path as well, using your existing smoothing code
+
+	// Set this to true when you've successfully built the path
+	// bDistanceMapPathValid = true;
+
+	if (bDistanceMapPathValid)
+	{
+		// once you have built the path (i.e. filled in the Steps array in the GAPathComponent), set the path component's state to GAPS_Active
+		// This will cause 
+		State = GAPS_Active;
+	}
+
+	return bDistanceMapPathValid;
+}
+
+
 EGAPathState UGAPathComponent::SmoothPath(
 	// Assignment 2 Part 4: smooth the path
 	// High level description from the lecture:
