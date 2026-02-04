@@ -1,4 +1,6 @@
 #include "GAPathComponent.h"
+
+#include "Chaos/EPA.h"
 #include "GameFramework/NavMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -304,24 +306,257 @@ EGAPathState UGAPathComponent::AStar(const FVector& StartPoint, TArray<FPathStep
 bool UGAPathComponent::Dijkstra(const FVector& StartPoint, FGAGridMap& DistanceMapOut) const
 {
 	// Assignment 3 Part 3-1: implement Dijkstra's algorithm to fill out the distance map
-	return false;
+	
+	// gets the grid
+	const AGAGridActor* Grid = GetGridActor();
+	// validates the grid
+	if (!Grid) 
+	{
+		return false;
+	}
+	
+	// gets the start cell
+	FCellRef StartCell = Grid->GetCellRef(StartPoint, false);
+	// validates the StartCell
+	if (!StartCell.IsValid() || !Grid->IsCellRefInBounds(StartCell))
+	{
+		return false;
+	}
+	
+	// defines the traversable conditions: valid cell within the bounds with 'Traversable` flag
+	auto IsTraversable = [&](const FCellRef& Cell) -> bool
+	{
+		if (!Cell.IsValid())
+		{
+			return false;
+		}
+		if (!Grid->IsCellRefInBounds(Cell))
+		{
+			return false;
+		}
+		// Added to check if cell is within the DistanceMap's bounds
+		if (!DistanceMapOut.GridBounds.IsValidCell(Cell))
+		{
+			return false;
+		}
+		return EnumHasAllFlags(Grid->GetCellData(Cell), ECellData::CellDataTraversable);
+	};
+
+	// makes sure the start cell is traversable
+	if (!IsTraversable(StartCell))
+	{
+		return false;
+	}
+	
+	// initializes DistanceMapOut
+	// d(start) = 0, d(all other) = +\infty
+	const float INF = 1e30f;
+	DistanceMapOut.ResetData(INF);
+	DistanceMapOut.SetValue(StartCell, 0.0f);
+	
+	// min-heap priority queue (processing the cell with the shortest distance firstly)
+	struct FQueueNode
+	{
+		FCellRef Cell;
+		float Distance = 0.0f;
+		
+		// smaller one should be popped
+		// considered the HeapPop pops the largest one, I make it inverse here.
+		bool operator<(const FQueueNode& Other) const
+		{
+			return Distance > Other.Distance;
+		}
+	};
+	
+	// creates a heap and pushes the startcell
+	TArray<FQueueNode> Heap;
+	Heap.Reserve(1024);
+	Heap.HeapPush(FQueueNode{ StartCell, 0.0f });
+	
+	// main loop: pop next, relax its neighbors
+	while (Heap.Num() > 0)
+	{
+		FQueueNode CurrentNode;
+		Heap.HeapPop(CurrentNode);
+		
+		const FCellRef U = CurrentNode.Cell;
+		const float DU = CurrentNode.Distance;
+		
+		float RecordedDU = INF;
+		if (!DistanceMapOut.GetValue(U, RecordedDU))
+		{
+			continue;
+		}
+		if (DU > RecordedDU)
+		{
+			continue;
+		}
+		
+		const FCellRef Neighbors[4] = {
+			FCellRef(U.X + 1, U.Y),
+			FCellRef(U.X - 1, U.Y),
+			FCellRef(U.X, U.Y + 1),
+			FCellRef(U.X, U.Y - 1),  // Fixed: was (U.X - 1, U.Y + 1)
+		};  
+		
+		for (const FCellRef& V : Neighbors)
+		{
+			if (!IsTraversable(V))
+			{
+				continue;
+			}
+			
+			const float Alt = DU + 1.0f; // edge cost = 1
+			
+			float DV = INF;
+			DistanceMapOut.GetValue(V, DV);
+			
+			if (Alt < DV)
+			{
+				DistanceMapOut.SetValue(V, Alt);
+				Heap.HeapPush(FQueueNode{ V, Alt });
+			}
+		}
+	}
+	return true;
 }
 
-bool UGAPathComponent::BuidPathFromDistanceMap(const FVector& StartPoint, const FCellRef& StartCellRef, const FGAGridMap& DistanceMap)
+bool UGAPathComponent::BuidPathFromDistanceMap(const FVector& EndPoint, const FCellRef& EndCellRef, const FGAGridMap& DistanceMap)
 {
-	bDistanceMapPathValid = false;
+	bDistanceMapPathValid = false; 
 
 	// Assignment 3 Part 3-2: reconstruct a path from the distance map
-
+	// clear the old path
+	Steps.Empty();
+	
+	// gets the grid validates it
+	const AGAGridActor* Grid = GetGridActor();
+	if (!Grid)
+	{
+		return false;
+	}
+	
+	// sets the start cell as the pawn's position
+	APawn* Pawn = GetOwnerPawn();
+	if (!Pawn)
+	{
+		return false;
+	}
+	const FVector OriginPoint = Pawn->GetActorLocation();
+	const FCellRef OriginCell = Grid->GetCellRef(OriginPoint, false);
+	
+	auto IsTraversable = [&](const FCellRef& Cell) -> bool
+	{
+		if (!Cell.IsValid())
+		{
+			return false;
+		}
+		if (!Grid->IsCellRefInBounds(Cell))
+		{
+			return false;
+		}
+		return EnumHasAllFlags(Grid->GetCellData(Cell), ECellData::CellDataTraversable);
+	};
+	
+	if (!IsTraversable(OriginCell) || !IsTraversable(EndCellRef))
+	{
+		return false;
+	}
+	
+	// checks reachability of the end point
+	const float INF = 1e30f;;
+	float EndDistance = INF;
+	if (!DistanceMap.GetValue(EndCellRef, EndDistance) || EndDistance >= INF)
+	{
+		return false;
+	}
+	
+	// reconstructs cell path by walking "downhill" in the distance field?
+	TArray<FCellRef> CellPathReversed;
+	CellPathReversed.Reserve(256);
+	FCellRef Current = EndCellRef;
+	CellPathReversed.Add(Current);
+	
+	const int32 MaxIterations = Grid->XCount * Grid->YCount + 10;
+	int32 Iteration = 0;
+	while (!(Current == OriginCell))
+	{
+		if (++Iteration > MaxIterations)
+		{
+			return false;
+		}
+		
+		float CurrentDistance = INF;
+		DistanceMap.GetValue(Current, CurrentDistance);
+		
+		FCellRef BestNext = FCellRef::Invalid;
+		float BestDistance = CurrentDistance;
+		
+		const FCellRef Neighbors[4] = {
+			FCellRef(Current.X + 1, Current.Y),
+			FCellRef(Current.X - 1, Current.Y),
+			FCellRef(Current.X, Current.Y + 1),
+			FCellRef(Current.X, Current.Y - 1),
+		};
+		
+		for (const FCellRef& N : Neighbors)
+		{
+			if (!IsTraversable(N)) continue;
+			
+			float ND = INF;
+			if (!DistanceMap.GetValue(N, ND)) continue;
+			
+			if (ND < BestDistance)
+			{
+				BestNext = N;
+				BestDistance = ND;
+			}
+		}
+		
+		if (!BestNext.IsValid())
+		{
+			return false;
+		}
+		
+		Current = BestNext;
+		CellPathReversed.Add(Current);
+	}
+	
+	// reverses to get Origin -> .. -> End
+	Algo::Reverse(CellPathReversed);
+	
+	// converts to unsmoothed steps
+	TArray<FPathStep> UnsmoothedSteps;
+	UnsmoothedSteps.Reserve(CellPathReversed.Num());
+	
+	int32 StartIndex = (CellPathReversed.Num() >0 && CellPathReversed[0] == OriginCell) ? 1 : 0;
+	for (int32 i = StartIndex; i < CellPathReversed.Num(); ++i)
+	{
+		const FCellRef Cell = CellPathReversed[i];
+		FPathStep Step;
+		Step.Set(Grid->GetCellPosition(Cell), Cell);
+		UnsmoothedSteps.Add(Step);
+	}
+	
+	if (UnsmoothedSteps.Num() == 0)
+	{
+		bDistanceMapPathValid = true;
+		State = GAPS_Finished;
+		return true;
+	}
+	
 	// Remember to smooth the path as well, using your existing smoothing code
+	// Smooth the reconstructed path
+	EGAPathState SmoothState = SmoothPath(OriginPoint, UnsmoothedSteps, Steps);
+	if (SmoothState != GAPS_Active || Steps.Num() == 0)
+	{
+		return false;
+	}
 
-	// Set this to true when you've successfully built the path
-	// bDistanceMapPathValid = true;
+	bDistanceMapPathValid = true;
 
 	if (bDistanceMapPathValid)
 	{
-		// once you have built the path (i.e. filled in the Steps array in the GAPathComponent), set the path component's state to GAPS_Active
-		// This will cause 
 		State = GAPS_Active;
 	}
 
@@ -357,32 +592,33 @@ EGAPathState UGAPathComponent::SmoothPath(
     };
 	
 	// clearance-aware traversability (1-cell padding)
-	auto IsTraversableWithClearance = [&](const FCellRef& Cell) -> bool
-	{
-		// center cell must be traversable
-		if (!IsTraversable(Cell)) return false;
-
-		// 1-cell clearance around it (8-neighborhood)
-		// (prevents smoothing from cutting corners too close to obstacles)
-		for (int dx = -1; dx <= 1; ++dx)
-		{
-			for (int dy = -1; dy <= 1; ++dy)
-			{
-				const FCellRef N(Cell.X + dx, Cell.Y + dy);
-				if (!IsTraversable(N))
-				{
-					return false;
-				}
-			}
-		}
-		return true;
-	};
+	// auto IsTraversableWithClearance = [&](const FCellRef& Cell) -> bool
+	// {
+	// 	// center cell must be traversable
+	// 	if (!IsTraversable(Cell)) return false;
+	//
+	// 	// 1-cell clearance around it (8-neighborhood)
+	// 	// (prevents smoothing from cutting corners too close to obstacles)
+	// 	for (int dx = -1; dx <= 1; ++dx)
+	// 	{
+	// 		for (int dy = -1; dy <= 1; ++dy)
+	// 		{
+	// 			const FCellRef N(Cell.X + dx, Cell.Y + dy);
+	// 			if (!IsTraversable(N))
+	// 			{
+	// 				return false;
+	// 			}
+	// 		}
+	// 	}
+	// 	return true;
+	// };
+	//
 	
     // line trace: walk cells from A to B (inclusive) and ensure all traversable.
     auto LineTraceCells = [&](const FCellRef& A, const FCellRef& B) -> bool
     {
         if (!A.IsValid() || !B.IsValid()) return false;
-    	if (!IsTraversableWithClearance(A) || !IsTraversableWithClearance(B)) return false;
+    	if (!IsTraversable(A) || !IsTraversable(B)) return false;
 
         int x0 = A.X, y0 = A.Y;
         int x1 = B.X, y1 = B.Y;
@@ -396,7 +632,7 @@ EGAPathState UGAPathComponent::SmoothPath(
         while (true)
         {
         	FCellRef C(x0, y0);
-        	if (!IsTraversableWithClearance(C))
+        	if (!IsTraversable(C))
         	{
         		return false;
         	}
@@ -452,10 +688,10 @@ EGAPathState UGAPathComponent::SmoothPath(
             {
                 BestJ = j;
             }
-            else
-            {
-                break;
-            }
+            // else
+            // {
+            //     break;
+            // }
         }
 
         {

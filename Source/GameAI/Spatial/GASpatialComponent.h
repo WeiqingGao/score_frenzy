@@ -35,12 +35,18 @@ class UGASpatialComponent : public UActorComponent
 	UPROPERTY()
 	mutable TSoftObjectPtr<UGAPathComponent> PathComponentInternal;
 
+	// Bias towards last chosen cell to reduce jitter
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float HysteresisBias = 0.25f;
+	bool bHasLastChosenCell = false;
+	FCellRef LastChosenCell;
+	
 	UFUNCTION(BlueprintCallable)
 	AGAGridActor *GetGridActor() const;
 
 	UFUNCTION(BlueprintCallable)
 	UGAPathComponent *GetPathComponent() const;
-
+	
 	// It is super easy to forget: this component will usually be attached to the CONTROLLER, not the pawn it's controlling
 	// A lot of times we want access to the pawn (e.g. when sending signals to its movement component).
 	UFUNCTION(BlueprintCallable, BlueprintPure)

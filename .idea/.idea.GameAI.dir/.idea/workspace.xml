@@ -8,12 +8,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="98e7953c-f33f-48e0-8c1d-1b72e49460f9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" beforeDir="false" afterPath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/BP_GAController.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/BP_GAController.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Maps/TestMap_Assignment3.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/TestMap_Assignment3.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Spatial/SpatialFunction_Flee.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Spatial/SpatialFunction_Flee.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Spatial/SpatialFunction_Hide.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Spatial/SpatialFunction_Hide.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Spatial/SpatialFunction_Hold.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Spatial/SpatialFunction_Hold.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/GameAI/Pathfinding/GAPathComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Pathfinding/GAPathComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialFunction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialFunction.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -140,7 +143,7 @@
       <workItem from="1767739705598" duration="16210000" />
       <workItem from="1768244599594" duration="40434000" />
       <workItem from="1768762358000" duration="35871000" />
-      <workItem from="1769559878037" duration="3520000" />
+      <workItem from="1769559878037" duration="74662000" />
     </task>
     <task id="LOCAL-00001" summary="fix(AGACharacter): reduce positional drift in figure-8 movement">
       <option name="closed" value="true" />
@@ -166,7 +169,15 @@
       <option name="project" value="LOCAL" />
       <updated>1769029697365</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="fix(merge): Merge master into Assignment_3 and restore missing functions after conflict resolution">
+      <option name="closed" value="true" />
+      <created>1769618330631</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1769618330632</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -179,7 +190,8 @@
     <MESSAGE value="fix(AGACharacter): reduce positional drift in figure-8 movement" />
     <MESSAGE value="feat(GAPathComponent): fill in astar() and smoothpath()." />
     <MESSAGE value="fix(smooth): fix the issue the capsule stuck on the edge sometimes" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix(smooth): fix the issue the capsule stuck on the edge sometimes" />
+    <MESSAGE value="fix(merge): Merge master into Assignment_3 and restore missing functions after conflict resolution" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix(merge): Merge master into Assignment_3 and restore missing functions after conflict resolution" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
