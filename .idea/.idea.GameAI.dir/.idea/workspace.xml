@@ -9,14 +9,22 @@
   <component name="ChangeListManager">
     <list default="true" id="98e7953c-f33f-48e0-8c1d-1b72e49460f9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" beforeDir="false" afterPath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/BP_GAController.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/BP_GAController.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Spatial/SpatialFunction_Flee.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Spatial/SpatialFunction_Flee.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Spatial/SpatialFunction_Hide.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Spatial/SpatialFunction_Hide.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Spatial/SpatialFunction_Hold.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Spatial/SpatialFunction_Hold.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GameAI/Pathfinding/GAPathComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Pathfinding/GAPathComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialFunction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialFunction.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BP_Character_VariantBase.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BP_Character_VariantBase.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BehaviorPieces/SetSpatialFunction_Service.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BehaviorPieces/SetSpatialFunction_Service.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BehaviorPieces/Shoot_Task.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BehaviorPieces/Shoot_Task.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BlackboardBase.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BlackboardBase.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Fodder/BP_Character_Fodder.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Fodder/BP_Character_Fodder.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Fodder/BehaviorTree_Fodder.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Fodder/BehaviorTree_Fodder.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Leader/BP_Character_Leader.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Leader/BP_Character_Leader.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Leader/BehaviorTree_Leader.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Leader/BehaviorTree_Leader.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Soldier/BehaviorTree_Soldier.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Soldier/BehaviorTree_Soldier.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/Maps/TestMap_Assignment4/0/MZ/89MM9X7QY8QERYLO1962CP.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/Maps/TestMap_Assignment4/0/MZ/89MM9X7QY8QERYLO1962CP.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/Maps/TestMap_Assignment4/6/VL/VPI7H89Y4I2DWYAWDWS8DU.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/Maps/TestMap_Assignment4/6/VL/VPI7H89Y4I2DWYAWDWS8DU.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/Maps/TestMap_Assignment4/8/6I/GO5EPO8FS5CID0MJMTBCZX.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/Maps/TestMap_Assignment4/8/6I/GO5EPO8FS5CID0MJMTBCZX.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/Maps/TestMap_Assignment4/9/QU/EREVQA6NZE7JBCP85Z1ASC.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/Maps/TestMap_Assignment4/9/QU/EREVQA6NZE7JBCP85Z1ASC.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/Maps/TestMap_Assignment4/A/GM/O3VSP7TCKTU4KW05GXVY34.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/Maps/TestMap_Assignment4/A/GM/O3VSP7TCKTU4KW05GXVY34.uasset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,7 +56,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "Uproject.GameAI.executor": "Run",
-    "git-widget-placeholder": "Assignment__3",
+    "git-widget-placeholder": "Assignment__4",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -144,6 +152,7 @@
       <workItem from="1768244599594" duration="40434000" />
       <workItem from="1768762358000" duration="35871000" />
       <workItem from="1769559878037" duration="74662000" />
+      <workItem from="1770665322105" duration="13626000" />
     </task>
     <task id="LOCAL-00001" summary="fix(AGACharacter): reduce positional drift in figure-8 movement">
       <option name="closed" value="true" />
