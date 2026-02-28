@@ -168,6 +168,8 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		// - Update TargetView->bClearLOS
 		//		Use this.VisionParameters to determine whether the target is within the vision cone or not 
 		//		(and ideally do so before you cast a ray towards it)
+		
+		
 		// - Update TargetView->Awareness
 		//		On ticks when the AI has a clear LOS, the Awareness should grow
 		//		On ticks when the AI does not have a clear LOS, the Awareness should decay
