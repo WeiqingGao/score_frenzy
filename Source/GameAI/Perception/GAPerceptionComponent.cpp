@@ -259,18 +259,18 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		// 4.updates Awareness
 		TargetView->bClearLos = bClearLOSNow;
 		
-		// 4-1 sets the rise rate and decay rate
+		// 4-1 sets the rise rate and fall rate
 		const float RiseRate = 0.8f;
-		const float DecayRate = 0.4f;
+		const float FallRate = 0.4f;
 		
-		// 4-2 
+		// 4-2 clamps the awareness meter
 		if (bClearLOSNow)
 		{
 			TargetView->Awareness = FMath::Clamp(TargetView->Awareness + RiseRate * GetWorld()->GetDeltaSeconds(), 0.f, 1.f);
 		}
 		else
 		{
-			TargetView->Awareness = FMath::Clamp(TargetView->Awareness - DecayRate * GetWorld()->GetDeltaSeconds(), 0.f, 1.f);
+			TargetView->Awareness = FMath::Clamp(TargetView->Awareness - FallRate * GetWorld()->GetDeltaSeconds(), 0.f, 1.f);
 		}
 	}
 }
