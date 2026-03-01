@@ -1,6 +1,11 @@
 #include "GAPerceptionComponent.h"
+
+#include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
 #include "GAPerceptionSystem.h"
+#include "Components/CapsuleComponent.h"
+#include "Concepts/Iterable.h"
+#include "GameFramework/Character.h"
 
 UGAPerceptionComponent::UGAPerceptionComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -188,6 +193,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		bool bWithinVisionDistance = Distance <= VisionParameters.VisionDistance;
 		
 		// 2. tests if within the vision field
+		bool bWithinVisionField = false;
 		if (bWithinVisionDistance)
 		{
 			// 2-1 gets the AI's current forward direction
@@ -201,14 +207,53 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 			// 2-4 calculates the cosine value of half of the VisionAngle
 			float CosineHalfVisionAngle = FMath::Cos(FMath::DegreesToRadians(VisionParameters.VisionAngle * 0.5f));
 			// 2-5 determines if within vision field
-			bool bWithinVisionField = CosineTargetAndForward >= CosineHalfVisionAngle;
+			bWithinVisionField = CosineTargetAndForward >= CosineHalfVisionAngle;
 		}
 		
 		// 3. LOS test
-		if (bWithinDistance && bWithinVisionField)
+		bool bClearLOSNow = false;
+		if (bWithinVisionDistance && bWithinVisionField)
 		{
-			bClearLOSNow = 
-				
+			// 3-1 gets the starting point of raycast
+			FVector RaycastStartLocation;
+			FRotator ViewRotation;
+			OwnerPawn->GetActorEyesViewPoint(RaycastStartLocation, ViewRotation);
+			
+			// 3-2 gets the end point of raycast
+			// 3-2-1 gets the target's character
+			ACharacter* TargetCharacter = Cast<ACharacter>(Target);
+			FVector RaycastEndLocation;
+			if (TargetCharacter)
+			{
+				// 3-2-2 makes the top of target's head as the end point,
+				//       since on this map, if the target is visible, the top of the target's head will also be visible
+				UCapsuleComponent* Capsule = TargetCharacter->GetCapsuleComponent();
+				// the middle position of the capsule 
+				FVector TargetCenter = Capsule->GetComponentLocation();
+				float TargetHalfHeight = Capsule->GetScaledCapsuleHalfHeight();
+
+				FVector TargetTop = TargetCenter + FVector(0,0,TargetHalfHeight);
+				RaycastEndLocation = TargetTop;
+			}
+
+			// 3-3 single line trace (raycast) by channel
+			FHitResult HitResult;
+			FCollisionQueryParams Params(SCENE_QUERY_STAT(GA_LOS));
+			// ignore itself
+			Params.AddIgnoredActor(OwnerPawn);
+			Params.bTraceComplex = true;
+			const ECollisionChannel Channel = ECC_Visibility;
+
+			const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, RaycastStartLocation, RaycastEndLocation, Channel, Params);
+			
+			if (HitResult.GetActor() == Target)
+			{
+				bClearLOSNow = true;
+			}
+			else
+			{
+				bClearLOSNow = false;
+			}
 		}
 		
 		// 4.updates Awareness

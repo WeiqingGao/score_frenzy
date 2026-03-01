@@ -9,6 +9,7 @@
   <component name="ChangeListManager">
     <list default="true" id="98e7953c-f33f-48e0-8c1d-1b72e49460f9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" beforeDir="false" afterPath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -140,7 +141,7 @@
       <workItem from="1768762358000" duration="35871000" />
       <workItem from="1769559878037" duration="74662000" />
       <workItem from="1770665322105" duration="13626000" />
-      <workItem from="1771786331676" duration="32272000" />
+      <workItem from="1771786331676" duration="42126000" />
     </task>
     <task id="LOCAL-00001" summary="fix(AGACharacter): reduce positional drift in figure-8 movement">
       <option name="closed" value="true" />
@@ -190,7 +191,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772336831287</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="feat(UGAPerceptionComponent): add vision field check">
+      <option name="closed" value="true" />
+      <created>1772337635358</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1772337635358</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -206,7 +215,8 @@
     <MESSAGE value="fix(merge): Merge master into Assignment_3 and restore missing functions after conflict resolution" />
     <MESSAGE value="git(merge): pull and merge" />
     <MESSAGE value="feat(UGAPerceptionComponent): add vision distance check" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(UGAPerceptionComponent): add vision distance check" />
+    <MESSAGE value="feat(UGAPerceptionComponent): add vision field check" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(UGAPerceptionComponent): add vision field check" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
