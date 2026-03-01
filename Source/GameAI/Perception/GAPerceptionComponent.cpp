@@ -168,8 +168,6 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		// - Update TargetView->bClearLOS
 		//		Use this.VisionParameters to determine whether the target is within the vision cone or not 
 		//		(and ideally do so before you cast a ray towards it)
-		
-		
 		// - Update TargetView->Awareness
 		//		On ticks when the AI has a clear LOS, the Awareness should grow
 		//		On ticks when the AI does not have a clear LOS, the Awareness should decay
@@ -178,6 +176,47 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		// You can add parameters to the UGAPerceptionComponent to control the speed at which awareness rises and falls
 
 		// YOUR CODE HERE
+		// 1. tests if within vision distance
+		// 1-1 gets the target's current location 
+		AActor* Target = TargetComponent->GetOwner();
+		const FVector TargetLocation = Target->GetActorLocation();
+		// 1-2 gets the AI's current location
+		const FVector SelfLocation = Target->GetActorLocation();
+		// 1-3 calculates the actual distance
+		const float Distance = FVector::Distance(SelfLocation, TargetLocation);
+		// 1-4 gets if within vision distance
+		bool bWithinDistance = Distance <= VisionParameters.VisionDistance;
+		
+		// 2. tests if within the vision field
+		if (bWithinDistance)
+		{
+			// 2-1 
+			const FVector 
+		}
+		
+		// 3. LOS test
+		if (bWithinDistance && bWithinVisionField)
+		{
+			bClearLOSNow = 
+				
+		}
+		
+		// 4.updates Awareness
+		TargetView->bClearLos = bClearLOSNow;
+		
+		// 4-1 sets the rise rate and decay rate
+		const float RiseRate = 0.8f;
+		const float DecayRate = 0.4f;
+		
+		// 4-2 
+		if (bClearLOSNow)
+		{
+			TargetView->Awareness = FMath::Clamp(TargetView->Awareness + RiseRate * GetWorld()->GetDeltaSeconds(), 0.f, 1.f);
+		}
+		else
+		{
+			TargetView->Awareness = FMath::Clamp(TargetView->Awareness - DecayRate * GetWorld()->GetDeltaSeconds(), 0.f, 1.f);
+		}
 	}
 }
 

@@ -9,12 +9,7 @@
   <component name="ChangeListManager">
     <list default="true" id="98e7953c-f33f-48e0-8c1d-1b72e49460f9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" beforeDir="false" afterPath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BP_Controller_VariantBase.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BP_Controller_VariantBase.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Characters/Player/BP_PlayerCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/Player/BP_PlayerCharacter.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/GameLogic/BP_GameAIGameMode.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GameLogic/BP_GameAIGameMode.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,7 +140,7 @@
       <workItem from="1768762358000" duration="35871000" />
       <workItem from="1769559878037" duration="74662000" />
       <workItem from="1770665322105" duration="13626000" />
-      <workItem from="1771786331676" duration="18269000" />
+      <workItem from="1771786331676" duration="31181000" />
     </task>
     <task id="LOCAL-00001" summary="fix(AGACharacter): reduce positional drift in figure-8 movement">
       <option name="closed" value="true" />
@@ -179,7 +174,15 @@
       <option name="project" value="LOCAL" />
       <updated>1769618330632</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="git(merge): pull and merge">
+      <option name="closed" value="true" />
+      <created>1772240919370</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1772240919370</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -193,7 +196,8 @@
     <MESSAGE value="feat(GAPathComponent): fill in astar() and smoothpath()." />
     <MESSAGE value="fix(smooth): fix the issue the capsule stuck on the edge sometimes" />
     <MESSAGE value="fix(merge): Merge master into Assignment_3 and restore missing functions after conflict resolution" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix(merge): Merge master into Assignment_3 and restore missing functions after conflict resolution" />
+    <MESSAGE value="git(merge): pull and merge" />
+    <option name="LAST_COMMIT_MESSAGE" value="git(merge): pull and merge" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
