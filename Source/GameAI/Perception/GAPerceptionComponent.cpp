@@ -184,14 +184,24 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		const FVector SelfLocation = Target->GetActorLocation();
 		// 1-3 calculates the actual distance
 		const float Distance = FVector::Distance(SelfLocation, TargetLocation);
-		// 1-4 gets if within vision distance
-		bool bWithinDistance = Distance <= VisionParameters.VisionDistance;
+		// 1-4 determines if within vision distance
+		bool bWithinVisionDistance = Distance <= VisionParameters.VisionDistance;
 		
 		// 2. tests if within the vision field
-		if (bWithinDistance)
+		if (bWithinVisionDistance)
 		{
-			// 2-1 
-			const FVector 
+			// 2-1 gets the AI's current forward direction
+			const FVector ForwardVector = OwnerPawn->GetActorForwardVector();
+			// 2-2 gets the vector from AI to the target
+			const FVector AIToTargetVector = TargetLocation - SelfLocation;
+			// 2-3 calculates the cosine value of the angle between these two vectors
+			// 2-3-1 gets the unit vectors of these two vectors
+			const FVector AIToTargetVectorUnit = AIToTargetVector.GetSafeNormal();
+			float CosineTargetAndForward = FVector::DotProduct(ForwardVector, AIToTargetVectorUnit);
+			// 2-4 calculates the cosine value of half of the VisionAngle
+			float CosineHalfVisionAngle = FMath::Cos(FMath::DegreesToRadians(VisionParameters.VisionAngle * 0.5f));
+			// 2-5 determines if within vision field
+			bool bWithinVisionField = CosineTargetAndForward >= CosineHalfVisionAngle;
 		}
 		
 		// 3. LOS test
