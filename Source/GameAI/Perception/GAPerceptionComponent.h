@@ -97,4 +97,9 @@ class UGAPerceptionComponent : public UActorComponent
 
 	// Return the FTargetView for the given target
 	const FTargetView * GetTargetView(FGuid TargetGuid) const;
+	
+	// helper function to test whether the given grid cell is visible from this perceiver
+	bool TestVisibility(const FCellRef& Cell) const;
 };
+
+

@@ -10,7 +10,7 @@
     <list default="true" id="98e7953c-f33f-48e0-8c1d-1b72e49460f9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -141,7 +141,7 @@
       <workItem from="1768762358000" duration="35871000" />
       <workItem from="1769559878037" duration="74662000" />
       <workItem from="1770665322105" duration="13626000" />
-      <workItem from="1771786331676" duration="51619000" />
+      <workItem from="1771786331676" duration="75006000" />
     </task>
     <task id="LOCAL-00001" summary="fix(AGACharacter): reduce positional drift in figure-8 movement">
       <option name="closed" value="true" />
@@ -215,7 +215,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772392742292</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="feat(OccupancyMapSetPosition): completes the function used for 'expectation validation', i.e. target is currently being perceived">
+      <option name="closed" value="true" />
+      <created>1772416125370</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1772416125370</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -234,7 +242,8 @@
     <MESSAGE value="feat(UGAPerceptionComponent): add vision field check" />
     <MESSAGE value="feat(UGAPerceptionComponent): add LOS check" />
     <MESSAGE value="func(UGAPerceptionComponent): updates awareness meter based on LOS result" />
-    <option name="LAST_COMMIT_MESSAGE" value="func(UGAPerceptionComponent): updates awareness meter based on LOS result" />
+    <MESSAGE value="feat(OccupancyMapSetPosition): completes the function used for 'expectation validation', i.e. target is currently being perceived" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(OccupancyMapSetPosition): completes the function used for 'expectation validation', i.e. target is currently being perceived" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
