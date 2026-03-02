@@ -186,7 +186,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		AActor* Target = TargetComponent->GetOwner();
 		const FVector TargetLocation = Target->GetActorLocation();
 		// 1-2 gets the AI's current location
-		const FVector SelfLocation = Target->GetActorLocation();
+		const FVector SelfLocation = OwnerPawn->GetActorLocation();
 		// 1-3 calculates the actual distance
 		const float Distance = FVector::Distance(SelfLocation, TargetLocation);
 		// 1-4 determines if within vision distance

@@ -141,6 +141,21 @@ void UGATargetComponent::OccupancyMapSetPosition(const FVector& Position)
 
 	// We've been observed to be in a given position
 	// Clear out all probability in the omap, and set the appropriate cell to P = 1.0
+
+	const AGAGridActor* Grid = GetGridActor();
+	if (Grid)
+	{
+		// $\forall n \neq n^*, p(n) \leftarrow 0$ 
+		OccupancyMap = FGAGridMap(Grid, 0.0f);
+
+		FCellRef TargetPositionInCellRef = Grid->GetCellRef(Position, false);
+	
+		// $p(n^*) \leftarrow 1$ 
+		if (TargetPositionInCellRef.IsValid() && Grid->IsCellRefInBounds(TargetPositionInCellRef))
+		{
+			OccupancyMap.SetValue(TargetPositionInCellRef, 1.0f);
+		}
+	}
 }
 
 
