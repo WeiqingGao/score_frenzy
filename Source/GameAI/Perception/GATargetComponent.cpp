@@ -2,6 +2,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameAI/Grid/GAGridActor.h"
 #include "GAPerceptionSystem.h"
+#include "IPropertyTable.h"
 #include "ProceduralMeshComponent.h"
 
 
@@ -237,28 +238,46 @@ void UGATargetComponent::OccupancyMapUpdate()
 		
 		// STEP 2: Clear out the probability in the visible cells
 		float CulledProbability = 0.0f;
-		for (FCellRef Cell : OccupancyMap)
+		int32 MinX = OccupancyMap.GridBounds.MinX;
+		int32 MaxX = OccupancyMap.GridBounds.MaxX;
+		int32 MinY = OccupancyMap.GridBounds.MinY;
+		int32 MaxY = OccupancyMap.GridBounds.MaxY;
+		
+		for (int32 y = MinY; y <= MaxY; ++y)
 		{
-			float CurrentValueInVisibilityMap;
-			VisibilityMap.GetValue(Cell, CurrentValueInVisibilityMap);
-			if (CurrentValueInVisibilityMap == 1.0f)
+			for (int32 x = MinX; x <= MaxX; ++x)
 			{
+				const FCellRef Cell(x,y);
+				float CurrentValueInVisibilityMap;
+				VisibilityMap.GetValue(Cell, CurrentValueInVisibilityMap);
+				
 				float CurrentProbabilityInOccupancyMap;
 				OccupancyMap.GetValue(Cell,CurrentProbabilityInOccupancyMap);
-				CulledProbability += CurrentProbabilityInOccupancyMap;
-				OccupancyMap.SetValue(Cell, 0.0f);
+				
+				if (CurrentValueInVisibilityMap == 1.0f)
+				{
+					CulledProbability += CurrentProbabilityInOccupancyMap;
+					OccupancyMap.SetValue(Cell, 0.0f);
+				} 
 			}
+			
+			
 		}
 		// STEP 3: Renormalize the OMap, so that it's still a valid probability distribution
-		for (FCellRef Cell : OccupancyMap)
+		for (int32 y = MinY; y <= MaxY; ++y)
 		{
-			float CurrentValueInVisibilityMap;
-			VisibilityMap.GetValue(Cell, CurrentValueInVisibilityMap);
-			if (CurrentValueInVisibilityMap == 0.0f)
+			for (int32 x = MinX; x <= MaxX; ++x)
 			{
-				float CurrentProbabilityInOccupancyMap;
-				OccupancyMap.GetValue(Cell,CurrentProbabilityInOccupancyMap);
-				OccupancyMap.SetValue(Cell, CurrentProbabilityInOccupancyMap / (1 - CulledProbability));
+				const FCellRef Cell(x,y);
+				
+				float CurrentValueInVisibilityMap;
+				VisibilityMap.GetValue(Cell, CurrentValueInVisibilityMap);
+				if (CurrentValueInVisibilityMap == 0.0f)
+				{
+					float CurrentProbabilityInOccupancyMap;
+					OccupancyMap.GetValue(Cell,CurrentProbabilityInOccupancyMap);
+					OccupancyMap.SetValue(Cell, CurrentProbabilityInOccupancyMap / (1 - CulledProbability));
+				}
 			}
 		}
 
