@@ -282,6 +282,25 @@ void UGATargetComponent::OccupancyMapUpdate()
 		}
 
 		// STEP 4: Extract the highest-likelihood cell on the omap and refresh the LastKnownState.
+		float MaxProbability = 0.0f;
+		FCellRef MaxProbabilityPosition;
+		for (int32 y = MinY; y <= MaxY; ++y)
+		{
+			for (int32 x = MinX; x <= MaxX; ++x)
+			{
+				const FCellRef Cell(x,y);
+				float P;
+				OccupancyMap.GetValue(Cell, P);
+				if (P > MaxProbability)
+				{
+					MaxProbability = P;
+					MaxProbabilityPosition = Cell;
+				}
+			}
+		}
+		
+		FVector MaxProbabilityPositionInWorldSpace = Grid->GetCellPosition(MaxProbabilityPosition);
+		LastKnownState.Set(MaxProbabilityPositionInWorldSpace, LastKnownState.Velocity);
 	}
 
 }
