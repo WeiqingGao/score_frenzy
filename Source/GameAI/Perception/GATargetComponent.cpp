@@ -234,11 +234,33 @@ void UGATargetComponent::OccupancyMapUpdate()
 				}
 			}
 		}
-
-
+		
 		// STEP 2: Clear out the probability in the visible cells
-
+		float CulledProbability = 0.0f;
+		for (FCellRef Cell : OccupancyMap)
+		{
+			float CurrentValueInVisibilityMap;
+			VisibilityMap.GetValue(Cell, CurrentValueInVisibilityMap);
+			if (CurrentValueInVisibilityMap == 1.0f)
+			{
+				float CurrentProbabilityInOccupancyMap;
+				OccupancyMap.GetValue(Cell,CurrentProbabilityInOccupancyMap);
+				CulledProbability += CurrentProbabilityInOccupancyMap;
+				OccupancyMap.SetValue(Cell, 0.0f);
+			}
+		}
 		// STEP 3: Renormalize the OMap, so that it's still a valid probability distribution
+		for (FCellRef Cell : OccupancyMap)
+		{
+			float CurrentValueInVisibilityMap;
+			VisibilityMap.GetValue(Cell, CurrentValueInVisibilityMap);
+			if (CurrentValueInVisibilityMap == 0.0f)
+			{
+				float CurrentProbabilityInOccupancyMap;
+				OccupancyMap.GetValue(Cell,CurrentProbabilityInOccupancyMap);
+				OccupancyMap.SetValue(Cell, CurrentProbabilityInOccupancyMap / (1 - CulledProbability));
+			}
+		}
 
 		// STEP 4: Extract the highest-likelihood cell on the omap and refresh the LastKnownState.
 	}
