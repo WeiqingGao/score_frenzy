@@ -181,6 +181,57 @@ void UGATargetComponent::OccupancyMapUpdate()
 				// Find visible cells for this perceiver.
 				// Reminder: Use the PerceptionComponent.VisionParameters when determining whether a cell is visible or not (in addition to a line trace).
 				// Suggestion: you might find it useful to add a UGAPerceptionComponent::TestVisibility method to the perception component.
+				
+				// selects candidate grid range by vision distance
+				// gets the location and orientation of this perceiver
+
+				APawn* Pawn = PerceptionComponent->GetOwnerPawn();
+
+				FVector EyeWorld;
+				FRotator EyeRot;
+				Pawn->GetActorEyesViewPoint(EyeWorld, EyeRot);
+				const FCellRef Center = Grid->GetCellRef(EyeWorld, /*bClamp=*/true);
+
+				const float VisionDistance = PerceptionComponent->VisionParameters.VisionDistance;
+				const int32 Radius = FMath::CeilToInt(VisionDistance / Grid->CellScale);
+				
+				
+				for (int32 y = Center.Y - Radius; y <= (Center.Y + Radius); ++y)
+				{
+					const int32 dy = y - Center.Y;
+
+					for (int32 x = Center.X - Radius; x <= (Center.X + Radius); ++x)
+					{
+						const int32 dx = x - Center.X;
+						
+						// 1. tests if within vision distance
+						// 1-1 transfer this cell's ref to world space since it is continuous, and thus more accurate
+						//const AGAGridActor* Grid = Cast<AGAGridActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGAGridActor::StaticClass()));
+						const FCellRef Cell(x,y);
+						const FVector thisCellLocation = Grid->GetCellPosition(Cell);
+						// 1-2 gets the AI's current location
+						const FVector PerceiverLocation = Pawn->GetActorLocation();
+						
+						// 2. tests if within the vision field
+						// 2-1 gets the AI's current forward direction
+						const FVector ForwardVector = Pawn->GetActorForwardVector();
+						// 2-2 gets the vector from AI to the target
+						const FVector PerceiverToThisCellVector = thisCellLocation - PerceiverLocation;
+						// 2-3 calculates the cosine value of the angle between these two vectors
+						// 2-3-1 gets the unit vectors of these two vectors
+						const FVector AIToTargetVectorUnit = PerceiverToThisCellVector.GetSafeNormal();
+						float CosineTargetAndForward = FVector::DotProduct(ForwardVector, AIToTargetVectorUnit);
+						// 2-4 calculates the cosine value of half of the VisionAngle
+						float CosineHalfVisionAngle = FMath::Cos(FMath::DegreesToRadians(PerceptionComponent->VisionParameters.VisionAngle * 0.5f));
+						// 2-5 determines if within vision field
+						if (CosineTargetAndForward < CosineHalfVisionAngle) continue;
+						
+						// LOS
+						if (!PerceptionComponent->TestVisibility(Cell)) continue;
+						
+						VisibilityMap.SetValue(Cell, 1.0f);
+					}
+				}
 			}
 		}
 

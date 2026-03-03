@@ -156,8 +156,8 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 {
 	// REMEMBER: the UGAPerceptionComponent is going to be attached to the controller, not the pawn. So we call this special accessor to 
 	// get the pawn that our controller is controlling
-	APawn* OwnerPawn = GetOwnerPawn();
-	if (OwnerPawn == NULL)
+	APawn* Pawn = GetOwnerPawn();
+	if (Pawn == NULL)
 	{
 		return;
 	}
@@ -190,7 +190,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		AActor* Target = TargetComponent->GetOwner();
 		const FVector TargetLocation = Target->GetActorLocation();
 		// 1-2 gets the AI's current location
-		const FVector SelfLocation = OwnerPawn->GetActorLocation();
+		const FVector SelfLocation = Pawn->GetActorLocation();
 		// 1-3 calculates the actual distance
 		const float Distance = FVector::Distance(SelfLocation, TargetLocation);
 		// 1-4 determines if within vision distance
@@ -201,7 +201,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		if (bWithinVisionDistance)
 		{
 			// 2-1 gets the AI's current forward direction
-			const FVector ForwardVector = OwnerPawn->GetActorForwardVector();
+			const FVector ForwardVector = Pawn->GetActorForwardVector();
 			// 2-2 gets the vector from AI to the target
 			const FVector AIToTargetVector = TargetLocation - SelfLocation;
 			// 2-3 calculates the cosine value of the angle between these two vectors
@@ -221,7 +221,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 			// 3-1 gets the starting point of raycast
 			FVector RaycastStartLocation;
 			FRotator ViewRotation;
-			OwnerPawn->GetActorEyesViewPoint(RaycastStartLocation, ViewRotation);
+			Pawn->GetActorEyesViewPoint(RaycastStartLocation, ViewRotation);
 			
 			// 3-2 gets the end point of raycast
 			// 3-2-1 gets the target's character
@@ -244,7 +244,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 			FHitResult HitResult;
 			FCollisionQueryParams Params(SCENE_QUERY_STAT(GA_LOS));
 			// ignore itself
-			Params.AddIgnoredActor(OwnerPawn);
+			Params.AddIgnoredActor(Pawn);
 			Params.bTraceComplex = true;
 			const ECollisionChannel Channel = ECC_Visibility;
 
@@ -287,43 +287,43 @@ const FTargetView* UGAPerceptionComponent::GetTargetView(FGuid TargetGuid) const
 
 bool UGAPerceptionComponent::TestVisibility(const FCellRef& Cell) const
 {
-	// 1. tests if within vision distance
-	// 1-1 transfer this cell's ref to world space since it is continuous, and thus more accurate
+	// // 1. tests if within vision distance
+	// // 1-1 transfer this cell's ref to world space since it is continuous, and thus more accurate
 	const AGAGridActor* Grid = Cast<AGAGridActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGAGridActor::StaticClass()));
 	const FVector thisLocation = Grid->GetCellPosition(Cell);
-	// 1-2 gets the AI's current location
-	APawn* OwnerPawn = GetOwnerPawn();
-	const FVector SelfLocation = OwnerPawn->GetActorLocation();
-	// 1-3 calculates the actual distance
-	const float Distance = FVector::Distance(SelfLocation, thisLocation);
-	// 1-4 determines if within vision distance
-	if (Distance > VisionParameters.VisionDistance) return false;
-	
-	// 2. tests if within the vision field
-	// 2-1 gets the AI's current forward direction
-	const FVector ForwardVector = OwnerPawn->GetActorForwardVector();
-	// 2-2 gets the vector from AI to the target
-	const FVector AIToTargetVector = thisLocation - SelfLocation;
-	// 2-3 calculates the cosine value of the angle between these two vectors
-	// 2-3-1 gets the unit vectors of these two vectors
-	const FVector AIToTargetVectorUnit = AIToTargetVector.GetSafeNormal();
-	float CosineTargetAndForward = FVector::DotProduct(ForwardVector, AIToTargetVectorUnit);
-	// 2-4 calculates the cosine value of half of the VisionAngle
-	float CosineHalfVisionAngle = FMath::Cos(FMath::DegreesToRadians(VisionParameters.VisionAngle * 0.5f));
-	// 2-5 determines if within vision field
-	if (CosineTargetAndForward < CosineHalfVisionAngle) return false;
+	// // 1-2 gets the AI's current location
+	APawn* Pawn = GetOwnerPawn();
+	// const FVector SelfLocation = Pawn->GetActorLocation();
+	// // 1-3 calculates the actual distance
+	// const float Distance = FVector::Distance(SelfLocation, thisLocation);
+	// // 1-4 determines if within vision distance
+	// if (Distance > VisionParameters.VisionDistance) return false;
+	//
+	// // 2. tests if within the vision field
+	// // 2-1 gets the AI's current forward direction
+	// const FVector ForwardVector = Pawn->GetActorForwardVector();
+	// // 2-2 gets the vector from AI to the target
+	// const FVector AIToTargetVector = thisLocation - SelfLocation;
+	// // 2-3 calculates the cosine value of the angle between these two vectors
+	// // 2-3-1 gets the unit vectors of these two vectors
+	// const FVector AIToTargetVectorUnit = AIToTargetVector.GetSafeNormal();
+	// float CosineTargetAndForward = FVector::DotProduct(ForwardVector, AIToTargetVectorUnit);
+	// // 2-4 calculates the cosine value of half of the VisionAngle
+	// float CosineHalfVisionAngle = FMath::Cos(FMath::DegreesToRadians(VisionParameters.VisionAngle * 0.5f));
+	// // 2-5 determines if within vision field
+	// if (CosineTargetAndForward < CosineHalfVisionAngle) return false;
 	
 	// 3. LOS test
 	// 3-1 gets the starting point of raycast
 	FVector RaycastStartLocation;
 	FRotator ViewRotation;
-	OwnerPawn->GetActorEyesViewPoint(RaycastStartLocation, ViewRotation);
+	Pawn->GetActorEyesViewPoint(RaycastStartLocation, ViewRotation);
 	
 	// 3-3 single line trace (raycast) by channel
 	FHitResult HitResult;
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(GA_LOS));
 	// ignore itself
-	Params.AddIgnoredActor(OwnerPawn);
+	Params.AddIgnoredActor(Pawn);
 	Params.bTraceComplex = true;
 	const ECollisionChannel Channel = ECC_Visibility;
 
