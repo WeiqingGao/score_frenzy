@@ -5,7 +5,7 @@
 #include "Math/MathFwd.h"
 #include "GASpatialFunction.h"
 #include "ProceduralMeshComponent.h"
-
+#include "GameAI/Perception/GAPerceptionComponent.h"
 
 
 UGASpatialComponent::UGASpatialComponent(const FObjectInitializer& ObjectInitializer)
@@ -270,18 +270,31 @@ void UGASpatialComponent::EvaluateLayer(const FFunctionLayer& Layer, const FGAGr
 	APawn* OwnerPawn = GetOwnerPawn();
 	const AGAGridActor* Grid = GetGridActor();
 
-	// Get the player pawn (the target for range and LOS calculations)
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	// // Get the player pawn (the target for range and LOS calculations)
+	// APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	AActor* Owner = GetOwner();
+	UGAPerceptionComponent* PerceptionComponent = Owner->GetComponentByClass<UGAPerceptionComponent>();
 	
-	// Early out if we need player but don't have one
-	if ((Layer.Input == SI_TargetRange || Layer.Input == SI_LOS) && PlayerPawn == NULL)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UGASpatialComponent::EvaluateLayer - No player pawn found for target-based input."));
-		return;
-	}
+	// // Early out if we need player but don't have one
+	// if ((Layer.Input == SI_TargetRange || Layer.Input == SI_LOS) && PlayerPawn == NULL)
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("UGASpatialComponent::EvaluateLayer - No player pawn found for target-based input."));
+	// 	return;
+	// }
 
+	FVector TargetLocation = FVector::ZeroVector;
+	
+	if (Layer.Input == SI_TargetRange || Layer.Input == SI_LOS)
+	{
+		if (!PerceptionComponent || !PerceptionComponent->HasTarget()) return;
+		FTargetState TargetState;
+		FTargetView TargetView;
+		if (!PerceptionComponent->GetCurrentTargetState(TargetState, TargetView)) return;
+		TargetLocation = TargetState.Position;
+	}
+	
 	// Cache player location for efficiency
-	FVector PlayerLocation = PlayerPawn ? PlayerPawn->GetActorLocation() : FVector::ZeroVector;
+	// FVector PlayerLocation = PlayerPawn ? PlayerPawn->GetActorLocation() : FVector::ZeroVector;
 	
 	// Get world for raycasting
 	UWorld* World = GetWorld();
@@ -323,7 +336,8 @@ void UGASpatialComponent::EvaluateLayer(const FFunctionLayer& Layer, const FGAGr
 					{
 						// Euclidean distance from this cell to the player (target)
 						FVector CellPosition = Grid->GetCellPosition(CellRef);
-						InputValue = FVector::Dist(CellPosition, PlayerLocation);
+						// InputValue = FVector::Dist(CellPosition, PlayerLocation);
+						InputValue = FVector::Dist(CellPosition, TargetLocation);
 						break;
 					}
 					
@@ -341,14 +355,15 @@ void UGASpatialComponent::EvaluateLayer(const FFunctionLayer& Layer, const FGAGr
 						// Line of sight to the player
 						// Returns 1.0 if we have clear LOS, 0.0 if blocked
 						FVector Start = Grid->GetCellPosition(CellRef);
-						FVector End = PlayerLocation;
+						// FVector End = PlayerLocation;
+						FVector End = TargetLocation;
 						
 						// Offset the start position up a bit so we're not tracing from the ground
 						Start.Z += 50.0f;
 						
 						FHitResult HitResult;
 						FCollisionQueryParams Params;
-						Params.AddIgnoredActor(PlayerPawn);
+						// Params.AddIgnoredActor(PlayerPawn);
 						Params.AddIgnoredActor(OwnerPawn);
 						
 						bool bHitSomething = World->LineTraceSingleByChannel(
