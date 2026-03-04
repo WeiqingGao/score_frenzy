@@ -7,10 +7,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="98e7953c-f33f-48e0-8c1d-1b72e49460f9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.cpp" afterDir="false" />
-    </list>
+    <list default="true" id="98e7953c-f33f-48e0-8c1d-1b72e49460f9" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -140,7 +137,7 @@
       <workItem from="1768762358000" duration="35871000" />
       <workItem from="1769559878037" duration="74662000" />
       <workItem from="1770665322105" duration="13626000" />
-      <workItem from="1771786331676" duration="118504000" />
+      <workItem from="1771786331676" duration="118848000" />
     </task>
     <task id="LOCAL-00001" summary="fix(AGACharacter): reduce positional drift in figure-8 movement">
       <option name="closed" value="true" />
@@ -278,7 +275,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772594731978</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="fix(UGATargetComponent::OccupancyMapSetPosition): changes the 2nd parameter of GetCellRef() to true from false in case that the target position falls outside the grid;&#10;fix(UGATargetComponent::OccupancyMapUpdate): for step 1, adds consideration for cases where a cell falls ouside the bounds when traversing candidate cell; adds additional filtering of the circle vision distance for each candidate cell; limits the vision field test to the horizontal plane; modifies the comments">
+      <option name="closed" value="true" />
+      <created>1772653516669</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1772653516669</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -305,7 +310,8 @@
     <MESSAGE value="feat(OccupancyMapUpdate): completes step 4 extract the highest-likelidhood cell and update the LastKnownState" />
     <MESSAGE value="feat(OccupancyMapDiffuse): completes the last function OccupancyMapDiffuse(), in which the probability is diffuesed across the grid" />
     <MESSAGE value="feat(GASpatialComponent::EvaludateLayer): makes AI use perception component to get the location info instead of giving it directly" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(GASpatialComponent::EvaludateLayer): makes AI use perception component to get the location info instead of giving it directly" />
+    <MESSAGE value="fix(UGATargetComponent::OccupancyMapSetPosition): changes the 2nd parameter of GetCellRef() to true from false in case that the target position falls outside the grid;&#10;fix(UGATargetComponent::OccupancyMapUpdate): for step 1, adds consideration for cases where a cell falls ouside the bounds when traversing candidate cell; adds additional filtering of the circle vision distance for each candidate cell; limits the vision field test to the horizontal plane; modifies the comments" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix(UGATargetComponent::OccupancyMapSetPosition): changes the 2nd parameter of GetCellRef() to true from false in case that the target position falls outside the grid;&#10;fix(UGATargetComponent::OccupancyMapUpdate): for step 1, adds consideration for cases where a cell falls ouside the bounds when traversing candidate cell; adds additional filtering of the circle vision distance for each candidate cell; limits the vision field test to the horizontal plane; modifies the comments" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

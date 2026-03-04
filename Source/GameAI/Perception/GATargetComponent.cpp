@@ -202,11 +202,11 @@ void UGATargetComponent::OccupancyMapUpdate()
 				//    and traverses all the grids of the circumscribed square region of this circle
 				for (int32 y = Center.Y - Radius; y <= (Center.Y + Radius); ++y)
 				{
-					const int32 dy = y - Center.Y;
+					// const int32 dy = y - Center.Y;
 
 					for (int32 x = Center.X - Radius; x <= (Center.X + Radius); ++x)
 					{
-						const int32 dx = x - Center.X;
+						// const int32 dx = x - Center.X;
 						
 						const FCellRef Cell(x,y);
 						// excludes cells outside the bound
@@ -303,6 +303,10 @@ void UGATargetComponent::OccupancyMapUpdate()
 			for (int32 x = MinX; x <= MaxX; ++x)
 			{
 				const FCellRef Cell(x,y);
+				// excludes cells outside the bound
+				if (!Grid->IsCellRefInBounds(Cell)) continue;
+				// excludes cells not traversable
+				if (!EnumHasAnyFlags(Grid->GetCellData(Cell), ECellData::CellDataTraversable)) continue;
 				float P;
 				OccupancyMap.GetValue(Cell, P);
 				if (P > MaxProbability)
