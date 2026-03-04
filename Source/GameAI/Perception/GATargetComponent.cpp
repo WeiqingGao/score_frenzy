@@ -149,7 +149,7 @@ void UGATargetComponent::OccupancyMapSetPosition(const FVector& Position)
 		// $\forall n \neq n^*, p(n) \leftarrow 0$ 
 		OccupancyMap = FGAGridMap(Grid, 0.0f);
 
-		FCellRef TargetPositionInCellRef = Grid->GetCellRef(Position, false);
+		FCellRef TargetPositionInCellRef = Grid->GetCellRef(Position, true);
 	
 		// $p(n^*) \leftarrow 1$ 
 		if (TargetPositionInCellRef.IsValid() && Grid->IsCellRefInBounds(TargetPositionInCellRef))
@@ -186,17 +186,20 @@ void UGATargetComponent::OccupancyMapUpdate()
 				// selects candidate grid range by vision distance
 				// gets the location and orientation of this perceiver
 
+				// 1. gets the vision's start point
 				APawn* Pawn = PerceptionComponent->GetOwnerPawn();
-
-				FVector EyeWorld;
-				FRotator EyeRot;
-				Pawn->GetActorEyesViewPoint(EyeWorld, EyeRot);
-				const FCellRef Center = Grid->GetCellRef(EyeWorld, /*bClamp=*/true);
-
+				FVector RaycastStartLocation;
+				FRotator ViewRotation;
+				Pawn->GetActorEyesViewPoint(RaycastStartLocation, ViewRotation);
+				// 2. gets this perceiver's vision distance
 				const float VisionDistance = PerceptionComponent->VisionParameters.VisionDistance;
+				// 3. since traversing the cells should be done in grid space, the vision's center and vision distance 
+				//    are converted to cell reference
+				const FCellRef Center = Grid->GetCellRef(RaycastStartLocation, /*bClamp=*/true);
 				const int32 Radius = FMath::CeilToInt(VisionDistance / Grid->CellScale);
 				
-				
+				// 4. draws a circle with the vision distance as the radius and the vision's start point as the center
+				//    and traverses all the grids of the circumscribed square region of this circle
 				for (int32 y = Center.Y - Radius; y <= (Center.Y + Radius); ++y)
 				{
 					const int32 dy = y - Center.Y;
@@ -205,29 +208,40 @@ void UGATargetComponent::OccupancyMapUpdate()
 					{
 						const int32 dx = x - Center.X;
 						
-						// 1. tests if within vision distance
-						// 1-1 transfer this cell's ref to world space since it is continuous, and thus more accurate
-						//const AGAGridActor* Grid = Cast<AGAGridActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGAGridActor::StaticClass()));
 						const FCellRef Cell(x,y);
-						const FVector thisCellLocation = Grid->GetCellPosition(Cell);
-						// 1-2 gets the AI's current location
-						const FVector PerceiverLocation = Pawn->GetActorLocation();
+						// excludes cells outside the bound
+						if (!Grid->IsCellRefInBounds(Cell)) continue;
 						
-						// 2. tests if within the vision field
-						// 2-1 gets the AI's current forward direction
-						const FVector ForwardVector = Pawn->GetActorForwardVector();
-						// 2-2 gets the vector from AI to the target
-						const FVector PerceiverToThisCellVector = thisCellLocation - PerceiverLocation;
-						// 2-3 calculates the cosine value of the angle between these two vectors
-						// 2-3-1 gets the unit vectors of these two vectors
-						const FVector AIToTargetVectorUnit = PerceiverToThisCellVector.GetSafeNormal();
-						float CosineTargetAndForward = FVector::DotProduct(ForwardVector, AIToTargetVectorUnit);
-						// 2-4 calculates the cosine value of half of the VisionAngle
+						// 4-1. tests if within vision distance
+						//      the scope is narrowed down to the inscribed circle region of the square area
+						// 4-1-1 the distance comparison would be more accurate in the world space since it is continuous
+						const FVector thisCellLocation = Grid->GetCellPosition(Cell);
+						float Distance = FVector::Distance(thisCellLocation, RaycastStartLocation);
+						// 4-1-2 when the cell's location is converted to world space, it is the grid center's coordinate,
+						//       thus half the grid's side length is subtracted
+						if ((Distance - Grid->CellScale / 2) > VisionDistance) continue;
+						
+						// 4-2. tests if within the vision field
+						// 4-2-1 gets the perceiver's current forward direction
+						FVector ForwardVector = Pawn->GetActorForwardVector();
+						// 4-2-2 gets the vector from AI to the target
+						FVector PerceiverToThisCellVector = thisCellLocation - RaycastStartLocation;
+						// 4-2-3 the goal is to make the vision angle judgement in the horizontal plane, therefore the 
+						//       vector in the Z direction is removed and then standardized
+						ForwardVector.Z = 0.0f;
+						ForwardVector.Normalize();
+						PerceiverToThisCellVector.Z = 0.0f;
+						PerceiverToThisCellVector.Normalize();
+						// 4-2-4 calculates the cosine value of the angle between these two vectors
+						// 4-2-4-1 gets the unit vectors of these two vectors
+						const FVector PerceiverToTargetVectorUnit = PerceiverToThisCellVector.GetSafeNormal();
+						float CosineTargetAndForward = FVector::DotProduct(ForwardVector, PerceiverToTargetVectorUnit);
+						// 4-2-5 calculates the cosine value of half of the VisionAngle
 						float CosineHalfVisionAngle = FMath::Cos(FMath::DegreesToRadians(PerceptionComponent->VisionParameters.VisionAngle * 0.5f));
-						// 2-5 determines if within vision field
+						// 4-2-6 determines if within vision field
 						if (CosineTargetAndForward < CosineHalfVisionAngle) continue;
 						
-						// LOS
+						// 4-3 LOS
 						if (!PerceptionComponent->TestVisibility(Cell)) continue;
 						
 						VisibilityMap.SetValue(Cell, 1.0f);
