@@ -335,22 +335,33 @@ void UGATargetComponent::OccupancyMapDiffuse()
 	int32 MaxX = OccupancyMap.GridBounds.MaxX;
 	int32 MinY = OccupancyMap.GridBounds.MinY;
 	int32 MaxY = OccupancyMap.GridBounds.MaxY;
+	
+	const float Alpha = 0.01f;
 		
 	for (int32 y = MinY; y <= MaxY; ++y)
 	{
 		for (int32 x = MinX; x <= MaxX; ++x)
 		{
 			const FCellRef Cell(x,y);
-			float LeftProbability;
-			OccupancyMap.GetValue(Cell, LeftProbability);
+			if (!Grid->IsCellRefInBounds(Cell)) continue;
+			
+			float CellProbability;
+			OccupancyMap.GetValue(Cell, CellProbability);
+			if (CellProbability == 0.0f) continue;
+			
+			float LeftProbability = CellProbability;
+			
 			for (int32 CurrY = y - 1; CurrY <= y + 1; ++CurrY)
 			{
 				for (int32 CurrX = x - 1; CurrX <= x + 1; ++CurrX)
 				{
-					FCellRef CurrCell(CurrX, CurrY);
-					float ProbabilityDiffusion;
-					float Alpha = 0.01;
 					if (CurrX == x && CurrY == y) continue;
+					
+					FCellRef Neighbor(CurrX, CurrY);
+					if (!Grid->IsCellRefInBounds(Neighbor)) continue;
+					if (!EnumHasAnyFlags(Grid->GetCellData(Neighbor), ECellData::CellDataTraversable)) continue;
+					
+					float ProbabilityDiffusion;
 					if ((CurrY - y + CurrX - x) % 2 == 0)
 					{
 						ProbabilityDiffusion = Alpha * LeftProbability / FMath::Sqrt(2.0f);
@@ -360,9 +371,9 @@ void UGATargetComponent::OccupancyMapDiffuse()
 						ProbabilityDiffusion = Alpha * LeftProbability;
 					}
 					float PreviousProbabilityOfThisNeighborCell;
-					Buffer.GetValue(CurrCell, PreviousProbabilityOfThisNeighborCell);
+					Buffer.GetValue(Neighbor, PreviousProbabilityOfThisNeighborCell);
 					PreviousProbabilityOfThisNeighborCell += ProbabilityDiffusion;
-					Buffer.SetValue(CurrCell, PreviousProbabilityOfThisNeighborCell);
+					Buffer.SetValue(Neighbor, PreviousProbabilityOfThisNeighborCell);
 					LeftProbability -= ProbabilityDiffusion;
 				}
 				

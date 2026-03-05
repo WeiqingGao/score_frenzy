@@ -9,7 +9,7 @@
   <component name="ChangeListManager">
     <list default="true" id="98e7953c-f33f-48e0-8c1d-1b72e49460f9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -140,7 +140,7 @@
       <workItem from="1768762358000" duration="35871000" />
       <workItem from="1769559878037" duration="74662000" />
       <workItem from="1770665322105" duration="13626000" />
-      <workItem from="1771786331676" duration="121675000" />
+      <workItem from="1771786331676" duration="123267000" />
     </task>
     <task id="LOCAL-00001" summary="fix(AGACharacter): reduce positional drift in figure-8 movement">
       <option name="closed" value="true" />
@@ -294,7 +294,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772653936697</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="fix(UGAPerceptionComponet::UpdateTargetView): besides &quot;hit the target&quot;, &quot;hit nothing&quot; now also counts as clear LOS">
+      <option name="closed" value="true" />
+      <created>1772670142157</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1772670142157</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -323,7 +331,8 @@
     <MESSAGE value="feat(GASpatialComponent::EvaludateLayer): makes AI use perception component to get the location info instead of giving it directly" />
     <MESSAGE value="fix(UGATargetComponent::OccupancyMapSetPosition): changes the 2nd parameter of GetCellRef() to true from false in case that the target position falls outside the grid;&#10;fix(UGATargetComponent::OccupancyMapUpdate): for step 1, adds consideration for cases where a cell falls ouside the bounds when traversing candidate cell; adds additional filtering of the circle vision distance for each candidate cell; limits the vision field test to the horizontal plane; modifies the comments" />
     <MESSAGE value="fix(UGATargetComponent::OccupancyMapUpdate): step 4, excludes cells outside the bound or not traversable" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix(UGATargetComponent::OccupancyMapUpdate): step 4, excludes cells outside the bound or not traversable" />
+    <MESSAGE value="fix(UGAPerceptionComponet::UpdateTargetView): besides &quot;hit the target&quot;, &quot;hit nothing&quot; now also counts as clear LOS" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix(UGAPerceptionComponet::UpdateTargetView): besides &quot;hit the target&quot;, &quot;hit nothing&quot; now also counts as clear LOS" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
