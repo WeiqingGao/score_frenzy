@@ -250,7 +250,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 
 			const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, RaycastStartLocation, RaycastEndLocation, Channel, Params);
 			
-			if (HitResult.GetActor() == Target)
+			if (!bHit || HitResult.GetActor() == Target)
 			{
 				bClearLOSNow = true;
 			}
@@ -293,25 +293,6 @@ bool UGAPerceptionComponent::TestVisibility(const FCellRef& Cell) const
 	const FVector thisLocation = Grid->GetCellPosition(Cell);
 	// // 1-2 gets the AI's current location
 	APawn* Pawn = GetOwnerPawn();
-	// const FVector SelfLocation = Pawn->GetActorLocation();
-	// // 1-3 calculates the actual distance
-	// const float Distance = FVector::Distance(SelfLocation, thisLocation);
-	// // 1-4 determines if within vision distance
-	// if (Distance > VisionParameters.VisionDistance) return false;
-	//
-	// // 2. tests if within the vision field
-	// // 2-1 gets the AI's current forward direction
-	// const FVector ForwardVector = Pawn->GetActorForwardVector();
-	// // 2-2 gets the vector from AI to the target
-	// const FVector AIToTargetVector = thisLocation - SelfLocation;
-	// // 2-3 calculates the cosine value of the angle between these two vectors
-	// // 2-3-1 gets the unit vectors of these two vectors
-	// const FVector AIToTargetVectorUnit = AIToTargetVector.GetSafeNormal();
-	// float CosineTargetAndForward = FVector::DotProduct(ForwardVector, AIToTargetVectorUnit);
-	// // 2-4 calculates the cosine value of half of the VisionAngle
-	// float CosineHalfVisionAngle = FMath::Cos(FMath::DegreesToRadians(VisionParameters.VisionAngle * 0.5f));
-	// // 2-5 determines if within vision field
-	// if (CosineTargetAndForward < CosineHalfVisionAngle) return false;
 	
 	// 3. LOS test
 	// 3-1 gets the starting point of raycast
