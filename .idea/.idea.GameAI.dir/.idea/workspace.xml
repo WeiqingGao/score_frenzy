@@ -9,7 +9,12 @@
   <component name="ChangeListManager">
     <list default="true" id="98e7953c-f33f-48e0-8c1d-1b72e49460f9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" beforeDir="false" afterPath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BP_Controller_VariantBase.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BP_Controller_VariantBase.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BlackboardBase.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/BlackboardBase.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Soldier/BP_Character_Soldier.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Soldier/BP_Character_Soldier.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Soldier/BehaviorTree_Soldier.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Soldier/BehaviorTree_Soldier.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,24 +40,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "Uproject.GameAI.executor": "Run",
-    "git-widget-placeholder": "Assignment__5",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "consents",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Uproject.GameAI.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Assignment__5&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;consents&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="GameAI" type="Uproject" factoryName="rider.uproject">
       <configuration_1 setup="1">
@@ -140,7 +145,8 @@
       <workItem from="1768762358000" duration="35871000" />
       <workItem from="1769559878037" duration="74662000" />
       <workItem from="1770665322105" duration="13626000" />
-      <workItem from="1771786331676" duration="123267000" />
+      <workItem from="1771786331676" duration="124384000" />
+      <workItem from="1772724715317" duration="10010000" />
     </task>
     <task id="LOCAL-00001" summary="fix(AGACharacter): reduce positional drift in figure-8 movement">
       <option name="closed" value="true" />
@@ -302,7 +308,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772670142157</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="fix(UGATargetComponent::OccupancyMapDiffuse): adds bounds and traversability checks; reorganizes code a little bit">
+      <option name="closed" value="true" />
+      <created>1772671839460</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1772671839460</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -332,7 +346,8 @@
     <MESSAGE value="fix(UGATargetComponent::OccupancyMapSetPosition): changes the 2nd parameter of GetCellRef() to true from false in case that the target position falls outside the grid;&#10;fix(UGATargetComponent::OccupancyMapUpdate): for step 1, adds consideration for cases where a cell falls ouside the bounds when traversing candidate cell; adds additional filtering of the circle vision distance for each candidate cell; limits the vision field test to the horizontal plane; modifies the comments" />
     <MESSAGE value="fix(UGATargetComponent::OccupancyMapUpdate): step 4, excludes cells outside the bound or not traversable" />
     <MESSAGE value="fix(UGAPerceptionComponet::UpdateTargetView): besides &quot;hit the target&quot;, &quot;hit nothing&quot; now also counts as clear LOS" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix(UGAPerceptionComponet::UpdateTargetView): besides &quot;hit the target&quot;, &quot;hit nothing&quot; now also counts as clear LOS" />
+    <MESSAGE value="fix(UGATargetComponent::OccupancyMapDiffuse): adds bounds and traversability checks; reorganizes code a little bit" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix(UGATargetComponent::OccupancyMapDiffuse): adds bounds and traversability checks; reorganizes code a little bit" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
