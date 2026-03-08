@@ -2,7 +2,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameAI/Grid/GAGridActor.h"
 #include "GAPerceptionSystem.h"
-#include "IPropertyTable.h"
 #include "ProceduralMeshComponent.h"
 
 
@@ -17,6 +16,8 @@ UGATargetComponent::UGATargetComponent(const FObjectInitializer& ObjectInitializ
 
 	// Generate a new guid
 	TargetGuid = FGuid::NewGuid();
+	
+	bDebugOccupancyMap = true;
 }
 
 

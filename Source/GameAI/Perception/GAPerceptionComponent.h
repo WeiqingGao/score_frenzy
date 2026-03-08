@@ -36,11 +36,14 @@ struct FVisionParameters
 {
 	GENERATED_USTRUCT_BODY()
 
-	FVisionParameters() : VisionAngle(90.0f), VisionDistance(7000.0f) {}
+	FVisionParameters() : FrontVisionAngle(30.0f), PeripheralVisionAngle(120.f), VisionDistance(7000.0f) {}
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	float VisionAngle;
+	float FrontVisionAngle;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	float PeripheralVisionAngle;
+	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float VisionDistance;
 
