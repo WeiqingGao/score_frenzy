@@ -10,8 +10,8 @@
     <list default="true" id="98e7953c-f33f-48e0-8c1d-1b72e49460f9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" beforeDir="false" afterPath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Soldier/BehaviorTree_Soldier.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Soldier/BehaviorTree_Soldier.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -26,7 +26,6 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://1" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../../../../../Shared/Epic Games/UE_5.7/Engine/Source/Runtime/AIModule/Classes/AIController.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
@@ -144,7 +143,7 @@
       <workItem from="1769559878037" duration="74662000" />
       <workItem from="1770665322105" duration="13626000" />
       <workItem from="1771786331676" duration="124384000" />
-      <workItem from="1772724715317" duration="17075000" />
+      <workItem from="1772724715317" duration="23726000" />
     </task>
     <task id="LOCAL-00001" summary="fix(AGACharacter): reduce positional drift in figure-8 movement">
       <option name="closed" value="true" />
@@ -322,7 +321,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772917102741</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="improve(vision model): improves the vision model to a 3-zone vision model; adds parameters in FVisionParameters; adjusts the logic of UpdateTargetView">
+      <option name="closed" value="true" />
+      <created>1772999062740</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1772999062740</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -354,7 +361,8 @@
     <MESSAGE value="fix(UGAPerceptionComponet::UpdateTargetView): besides &quot;hit the target&quot;, &quot;hit nothing&quot; now also counts as clear LOS" />
     <MESSAGE value="fix(UGATargetComponent::OccupancyMapDiffuse): adds bounds and traversability checks; reorganizes code a little bit" />
     <MESSAGE value="setup(behavior tree and blueprint): sets up the soilder's behavior tree; adds 3 blackboard keys to store if the soilder has target, the soilder's current state, and the target's position; adds a blueprint service to call the GetCurrentTargetState() and assign the result to the 3 new blackboard keys; adjust the VisionDistance as 7000.0f" />
-    <option name="LAST_COMMIT_MESSAGE" value="setup(behavior tree and blueprint): sets up the soilder's behavior tree; adds 3 blackboard keys to store if the soilder has target, the soilder's current state, and the target's position; adds a blueprint service to call the GetCurrentTargetState() and assign the result to the 3 new blackboard keys; adjust the VisionDistance as 7000.0f" />
+    <MESSAGE value="improve(vision model): improves the vision model to a 3-zone vision model; adds parameters in FVisionParameters; adjusts the logic of UpdateTargetView" />
+    <option name="LAST_COMMIT_MESSAGE" value="improve(vision model): improves the vision model to a 3-zone vision model; adds parameters in FVisionParameters; adjusts the logic of UpdateTargetView" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

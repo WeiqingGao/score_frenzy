@@ -230,24 +230,6 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 			}
 		}
 		
-		// // 2. tests if within the vision field
-		// bool bWithinVisionField = false;
-		// if (bWithinVisionDistance)
-		// {
-		// 	// 2-1 gets the AI's current forward direction
-		// 	const FVector ForwardVector = Pawn->GetActorForwardVector();
-		// 	// 2-2 gets the vector from AI to the target
-		// 	const FVector AIToTargetVector = TargetLocation - SelfLocation;
-		// 	// 2-3 calculates the cosine value of the angle between these two vectors
-		// 	// 2-3-1 gets the unit vectors of these two vectors
-		// 	const FVector AIToTargetVectorUnit = AIToTargetVector.GetSafeNormal();
-		// 	float CosineTargetAndForward = FVector::DotProduct(ForwardVector, AIToTargetVectorUnit);
-		// 	// 2-4 calculates the cosine value of half of the VisionAngle
-		// 	float CosineHalfVisionAngle = FMath::Cos(FMath::DegreesToRadians(VisionParameters.VisionAngle * 0.5f));
-		// 	// 2-5 determines if within vision field
-		// 	bWithinVisionField = CosineTargetAndForward >= CosineHalfVisionAngle;
-		// }
-		
 		// 3. LOS test
 		bool bClearLOSNow = false;
 		if (VisionZone != EVisionZone::None)
@@ -299,7 +281,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		
 		// 4-1 sets the rise rate and fall rate
 		float RiseRate = 0.0f;
-		float FallRate = 0.4f;
+		float FallRate = 0.5f;
 		
 		// 4-2 sets the rise rate based on vision zone, then clamps the awareness meter
 		if (bClearLOSNow)
@@ -307,10 +289,10 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 			switch (VisionZone)
 			{
 				case EVisionZone::Front:
-					RiseRate = 1.5f;
+					RiseRate = 1.6f;
 					break;
 				case EVisionZone::Peripheral:
-					RiseRate = 0.4f;
+					RiseRate = 1.0f;
 					break;
 				case EVisionZone::Rear:
 					RiseRate = 0.1f;

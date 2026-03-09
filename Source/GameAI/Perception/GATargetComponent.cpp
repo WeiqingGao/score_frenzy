@@ -238,7 +238,7 @@ void UGATargetComponent::OccupancyMapUpdate()
 						const FVector PerceiverToTargetVectorUnit = PerceiverToThisCellVector.GetSafeNormal();
 						float CosineTargetAndForward = FVector::DotProduct(ForwardVector, PerceiverToTargetVectorUnit);
 						// 4-2-5 calculates the cosine value of half of the VisionAngle
-						float CosineHalfVisionAngle = FMath::Cos(FMath::DegreesToRadians(PerceptionComponent->VisionParameters.VisionAngle * 0.5f));
+						float CosineHalfVisionAngle = FMath::Cos(FMath::DegreesToRadians(PerceptionComponent->VisionParameters.PeripheralVisionAngle * 0.5f));
 						// 4-2-6 determines if within vision field
 						if (CosineTargetAndForward < CosineHalfVisionAngle) continue;
 						
