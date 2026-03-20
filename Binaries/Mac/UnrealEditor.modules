@@ -2,6 +2,6 @@
 	"BuildId": "47537391",
 	"Modules": 
 	{
-		"GameAI": "UnrealEditor-GameAI.dylib"
+		"ScoreFrenzy": "UnrealEditor-ScoreFrenzy.dylib"
 	}
 }

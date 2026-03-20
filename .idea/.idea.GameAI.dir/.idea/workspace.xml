@@ -9,8 +9,32 @@
   <component name="ChangeListManager">
     <list default="true" id="98e7953c-f33f-48e0-8c1d-1b72e49460f9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GameAI.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" beforeDir="false" afterPath="$PROJECT_DIR$/Binaries/Mac/UnrealEditor-GameAI.dylib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Soldier/BehaviorTree_Soldier.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/AICharacter/Variants/Soldier/BehaviorTree_Soldier.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GameAI.uproject" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/AICharacter/GACharacter.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/AICharacter/GACharacter.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/GameAI.Build.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/GameAI.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/GameAI.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/GameAIGameMode.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/GameAIGameMode.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Grid/GAGridActor.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Grid/GAGridActor.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Grid/GAGridMap.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Grid/GAGridMap.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Pathfinding/GAPathComponent.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Pathfinding/GAPathComponent.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionComponent.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionSystem.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GAPerceptionSystem.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Perception/GATargetComponent.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Player/GAPlayerCharacter.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Player/GAPlayerCharacter.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialComponent.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialComponent.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialFunction.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GameAI/Spatial/GASpatialFunction.h" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,8 +47,20 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;WeiqingGao&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/WeiqingGao/score_frenzy.git&quot;,
+    &quot;accountId&quot;: &quot;468b9a65-279d-4263-9e8e-799e23db0626&quot;
+  }
+}</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/../../../../../../../../Shared/Epic Games/UE_5.7/Engine/Source/Runtime/AIModule/Classes/AIController.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/Shared/Epic Games/UE_5.7/Engine/Source/Runtime/AIModule/Classes/AIController.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
@@ -43,7 +79,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;Uproject.GameAI.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Assignment__5&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;EnemyAI&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -59,10 +95,10 @@
         <option name="CONFIGURATION" value="DebugGame Editor" />
         <option name="PLATFORM" value="Mac" />
         <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
-        <option name="EXECUTABLE_PATH" value="$PROJECT_DIR$/../../../../../../../../Shared/Epic Games/UE_5.7/Engine/Binaries/Mac/UnrealEditor-Mac-DebugGame.app/Contents/MacOS/UnrealEditor-Mac-DebugGame" />
+        <option name="EXECUTABLE_PATH" value="$PROJECT_DIR$/../../../../../../../../../Shared/Epic Games/UE_5.7/Engine/Binaries/Mac/UnrealEditor-Mac-DebugGame.app/Contents/MacOS/UnrealEditor-Mac-DebugGame" />
         <option name="MANDATORY_PROGRAM_PARAMETERS" value=" &quot;$PROJECT_DIR$/GameAI.uproject&quot;" />
         <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
-        <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../../../../../../Shared/Epic Games/UE_5.7" />
+        <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../../../../../../../Shared/Epic Games/UE_5.7" />
         <option name="PASS_PARENT_ENVS" value="1" />
         <option name="USE_EXTERNAL_CONSOLE" value="0" />
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
@@ -75,7 +111,7 @@
         <option name="EXECUTABLE_PATH" value="$PROJECT_DIR$/Binaries/Mac/GameAI-Mac-DebugGame.app/Contents/MacOS/GameAI-Mac-DebugGame" />
         <option name="MANDATORY_PROGRAM_PARAMETERS" value="" />
         <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
-        <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../../../../../../Shared/Epic Games/UE_5.7" />
+        <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../../../../../../../Shared/Epic Games/UE_5.7" />
         <option name="PASS_PARENT_ENVS" value="1" />
         <option name="USE_EXTERNAL_CONSOLE" value="0" />
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
@@ -85,10 +121,10 @@
         <option name="CONFIGURATION" value="Development Editor" />
         <option name="PLATFORM" value="Mac" />
         <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
-        <option name="EXECUTABLE_PATH" value="$PROJECT_DIR$/../../../../../../../../Shared/Epic Games/UE_5.7/Engine/Binaries/Mac/UnrealEditor.app/Contents/MacOS/UnrealEditor" />
+        <option name="EXECUTABLE_PATH" value="$PROJECT_DIR$/../../../../../../../../../Shared/Epic Games/UE_5.7/Engine/Binaries/Mac/UnrealEditor.app/Contents/MacOS/UnrealEditor" />
         <option name="MANDATORY_PROGRAM_PARAMETERS" value=" &quot;$PROJECT_DIR$/GameAI.uproject&quot;" />
         <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
-        <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../../../../../../Shared/Epic Games/UE_5.7" />
+        <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../../../../../../../Shared/Epic Games/UE_5.7" />
         <option name="PASS_PARENT_ENVS" value="1" />
         <option name="USE_EXTERNAL_CONSOLE" value="0" />
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
@@ -101,7 +137,7 @@
         <option name="EXECUTABLE_PATH" value="$PROJECT_DIR$/Binaries/Mac/GameAI.app/Contents/MacOS/GameAI" />
         <option name="MANDATORY_PROGRAM_PARAMETERS" value="" />
         <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
-        <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../../../../../../Shared/Epic Games/UE_5.7" />
+        <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../../../../../../../Shared/Epic Games/UE_5.7" />
         <option name="PASS_PARENT_ENVS" value="1" />
         <option name="USE_EXTERNAL_CONSOLE" value="0" />
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
@@ -114,7 +150,7 @@
         <option name="EXECUTABLE_PATH" value="$PROJECT_DIR$/Binaries/Mac/GameAI-Mac-Shipping.app/Contents/MacOS/GameAI-Mac-Shipping" />
         <option name="MANDATORY_PROGRAM_PARAMETERS" value="" />
         <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
-        <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../../../../../../Shared/Epic Games/UE_5.7" />
+        <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../../../../../../../Shared/Epic Games/UE_5.7" />
         <option name="PASS_PARENT_ENVS" value="1" />
         <option name="USE_EXTERNAL_CONSOLE" value="0" />
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
@@ -142,6 +178,8 @@
       <workItem from="1770665322105" duration="13626000" />
       <workItem from="1771786331676" duration="124384000" />
       <workItem from="1772724715317" duration="24676000" />
+      <workItem from="1773969723889" duration="654000" />
+      <workItem from="1773972853166" duration="884000" />
     </task>
     <task id="LOCAL-00001" summary="fix(AGACharacter): reduce positional drift in figure-8 movement">
       <option name="closed" value="true" />
