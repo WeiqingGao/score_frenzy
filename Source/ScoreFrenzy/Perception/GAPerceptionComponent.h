@@ -92,6 +92,16 @@ class UGAPerceptionComponent : public UActorComponent
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FGuid, FTargetView> TargetMap;
 
+	// True once another AI (or game logic) has radioed this AI with the player's position.
+	// Distinct from Awareness: an AI can be alerted without having seen the player directly.
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsAlerted;
+
+	// Called by GAPerceptionSystem::PropagateAlertToNearest when this AI is chosen as a recipient.
+	// Implement in Blueprint to write PlayerPosition into the AI's Blackboard.
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void OnAlertReceived(const FVector& PlayerPosition);
+
 	void UpdateAllTargetViews();
 	void UpdateTargetView(UGATargetComponent* TargetComponent);
 

@@ -9,6 +9,14 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateAICharacter, Log, All);
 
+UENUM(BlueprintType)
+enum class EHealingState : uint8
+{
+	Normal      UMETA(DisplayName = "Normal"),      // Normal combat / patrol mode
+	Retreating  UMETA(DisplayName = "Retreating"),  // Moving away from player before healing
+	Healing     UMETA(DisplayName = "Healing"),     // Regenerating health out of combat
+};
+
 // The base class for our AI characters in CS 4150/5150
 // Note the use of the UClass specifiers:
 //    BlueprintType - you can use this class as the type for a variable in Blueprint
@@ -36,13 +44,48 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -1.0, ClampMax = 1.0f))
 	float MoveAmplitude;
 
-protected:
-	
-	// To add mapping context
-	virtual void BeginPlay();
+	// --- Health & Healing System ---
 
-	// Tick every frame
-	virtual void Tick(float DeltaSeconds);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0.0f))
+	float MaxHealth;
+
+	UPROPERTY(BlueprintReadWrite)
+	float Health;
+
+	// Health fraction (0–1) at or below which the AI considers retreating to heal
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0.0f, ClampMax = 1.0f))
+	float LowHealthThreshold;
+
+	// Health points restored per second while in the Healing state
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0.0f))
+	float HealRate;
+
+	// True while the AI is actively fighting; suppresses healing even in Healing state
+	UPROPERTY(BlueprintReadWrite)
+	bool bInCombat;
+
+	UPROPERTY(BlueprintReadOnly)
+	EHealingState HealingState;
+
+	// Enter Healing state. Also clears bInCombat.
+	UFUNCTION(BlueprintCallable)
+	void EnterHealingState();
+
+	// Return to Normal state. Called automatically on full health, or externally on death.
+	UFUNCTION(BlueprintCallable)
+	void ExitHealingState();
+
+	// External setter for bInCombat (called from BT services).
+	UFUNCTION(BlueprintCallable)
+	void SetInCombat(bool bCombat);
+
+	// Returns true when Health / MaxHealth <= LowHealthThreshold.
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsLowHealth() const;
+
+protected:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 };
 

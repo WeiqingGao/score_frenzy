@@ -33,22 +33,55 @@ AGACharacter::AGACharacter()
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
-	// Initial movement frequency and amplitude
 	MoveFrequency = 1.5f;
 	MoveAmplitude = 1.0f;
 
+	MaxHealth = 100.0f;
+	Health = 100.0f;
+	LowHealthThreshold = 0.3f;
+	HealRate = 10.0f;
+	bInCombat = false;
+	HealingState = EHealingState::Normal;
 }
 
 void AGACharacter::BeginPlay()
 {
-	// Call the base class  
 	Super::BeginPlay();
-
+	Health = MaxHealth;
 }
 
 void AGACharacter::Tick(float DeltaSeconds)
 {
-	// Do nothing
-
 	Super::Tick(DeltaSeconds);
+
+	// Regenerate health only when in Healing state and not actively in combat
+	if (HealingState == EHealingState::Healing && !bInCombat)
+	{
+		Health = FMath::Min(Health + HealRate * DeltaSeconds, MaxHealth);
+		if (Health >= MaxHealth)
+		{
+			ExitHealingState();
+		}
+	}
+}
+
+void AGACharacter::EnterHealingState()
+{
+	HealingState = EHealingState::Healing;
+	bInCombat = false;
+}
+
+void AGACharacter::ExitHealingState()
+{
+	HealingState = EHealingState::Normal;
+}
+
+void AGACharacter::SetInCombat(bool bCombat)
+{
+	bInCombat = bCombat;
+}
+
+bool AGACharacter::IsLowHealth() const
+{
+	return (MaxHealth > 0.0f) && ((Health / MaxHealth) <= LowHealthThreshold);
 }

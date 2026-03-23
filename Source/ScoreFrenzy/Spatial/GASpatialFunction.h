@@ -13,8 +13,8 @@ enum ESpatialInput
 	SI_None				UMETA(DisplayName = "None"),
 	SI_TargetRange		UMETA(DisplayName = "Target Range"),
 	SI_PathDistance		UMETA(DisplayName = "PathDistance"),
-	SI_LOS				UMETA(DisplayName = "Line Of Sight")
-	// Add others if you want!
+	SI_LOS				UMETA(DisplayName = "Line Of Sight"),
+	SI_CoverFromPlayer	UMETA(DisplayName = "Cover From Player")	// Scores cells where the player's LOS is blocked
 };
 
 UENUM(BlueprintType)
