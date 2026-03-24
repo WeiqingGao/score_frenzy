@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GATargetComponent.h"
+#include "ScoreFrenzy/Grid/GAGridActor.h"
 #include "GAPerceptionComponent.generated.h"
 
 
@@ -36,10 +37,15 @@ struct FVisionParameters
 {
 	GENERATED_USTRUCT_BODY()
 
-	FVisionParameters() : VisionAngle(90.0f), VisionDistance(1000.0f) {}
+	FVisionParameters() : FrontVisionAngle(60.0f), PeripheralVisionAngle(120.0f), VisionDistance(1000.0f) {}
 
+	// Half-angle of the tight front cone (degrees). Awareness rises fastest here.
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	float VisionAngle;
+	float FrontVisionAngle;
+
+	// Half-angle of the wider peripheral cone (degrees). Awareness rises slower here.
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	float PeripheralVisionAngle;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float VisionDistance;
@@ -107,4 +113,8 @@ class UGAPerceptionComponent : public UActorComponent
 
 	// Return the FTargetView for the given target
 	const FTargetView * GetTargetView(FGuid TargetGuid) const;
+
+	// Returns true if the given grid cell is visible from this perceiver's eye point (LOS only, no cone check).
+	// Used by UGATargetComponent::OccupancyMapUpdate to build the visibility map.
+	bool TestVisibility(const FCellRef& Cell) const;
 };

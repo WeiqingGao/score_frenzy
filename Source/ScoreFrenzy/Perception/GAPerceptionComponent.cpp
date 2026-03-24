@@ -1,6 +1,9 @@
 #include "GAPerceptionComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GAPerceptionSystem.h"
+#include "ScoreFrenzy/Grid/GAGridActor.h"
+#include "GameFramework/Character.h"
+#include "Components/CapsuleComponent.h"
 
 UGAPerceptionComponent::UGAPerceptionComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -145,16 +148,14 @@ void UGAPerceptionComponent::UpdateAllTargetViews()
 
 void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponent)
 {
-	// REMEMBER: the UGAPerceptionComponent is going to be attached to the controller, not the pawn. So we call this special accessor to 
-	// get the pawn that our controller is controlling
-	APawn* OwnerPawn = GetOwnerPawn();
-	if (OwnerPawn == NULL)
+	APawn* Pawn = GetOwnerPawn();
+	if (Pawn == NULL)
 	{
 		return;
 	}
 
 	FTargetView *TargetView = TargetMap.Find(TargetComponent->TargetGuid);
-	if (TargetView == NULL)		// If we don't already have a target data for the given target component, add it
+	if (TargetView == NULL)
 	{
 		FTargetView NewTargetView;
 		FGuid TargetGuid = TargetComponent->TargetGuid;
@@ -163,19 +164,70 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 
 	if (TargetView)
 	{
-		// TODO PART 3
-		// 
-		// - Update TargetView->bClearLOS
-		//		Use this.VisionParameters to determine whether the target is within the vision cone or not 
-		//		(and ideally do so before you cast a ray towards it)
-		// - Update TargetView->Awareness
-		//		On ticks when the AI has a clear LOS, the Awareness should grow
-		//		On ticks when the AI does not have a clear LOS, the Awareness should decay
-		//
-		// Awareness should be clamped to the range [0, 1]
-		// You can add parameters to the UGAPerceptionComponent to control the speed at which awareness rises and falls
+		AActor* Target = TargetComponent->GetOwner();
+		const FVector TargetLocation = Target->GetActorLocation();
+		const FVector SelfLocation = Pawn->GetActorLocation();
+		const float Distance = FVector::Distance(SelfLocation, TargetLocation);
+		bool bWithinVisionDistance = Distance <= VisionParameters.VisionDistance;
 
-		// YOUR CODE HERE
+		enum class EVisionZone { Front, Peripheral, None };
+		EVisionZone VisionZone = EVisionZone::None;
+
+		if (bWithinVisionDistance)
+		{
+			const FVector ForwardVector = Pawn->GetActorForwardVector();
+			const FVector AIToTargetVectorUnit = (TargetLocation - SelfLocation).GetSafeNormal();
+			float CosineTargetAndForward = FVector::DotProduct(ForwardVector, AIToTargetVectorUnit);
+			float CosineHalfFrontVisionAngle = FMath::Cos(FMath::DegreesToRadians(VisionParameters.FrontVisionAngle * 0.5f));
+			float CosineHalfPeripheralVisionAngle = FMath::Cos(FMath::DegreesToRadians(VisionParameters.PeripheralVisionAngle * 0.5f));
+
+			if (CosineTargetAndForward >= CosineHalfFrontVisionAngle)
+			{
+				VisionZone = EVisionZone::Front;
+			}
+			else if (CosineTargetAndForward >= CosineHalfPeripheralVisionAngle)
+			{
+				VisionZone = EVisionZone::Peripheral;
+			}
+		}
+
+		bool bClearLOSNow = false;
+		if (VisionZone != EVisionZone::None)
+		{
+			FVector RaycastStartLocation;
+			FRotator ViewRotation;
+			Pawn->GetActorEyesViewPoint(RaycastStartLocation, ViewRotation);
+
+			ACharacter* TargetCharacter = Cast<ACharacter>(Target);
+			FVector RaycastEndLocation = TargetLocation;
+			if (TargetCharacter)
+			{
+				UCapsuleComponent* Capsule = TargetCharacter->GetCapsuleComponent();
+				FVector TargetTop = Capsule->GetComponentLocation() + FVector(0, 0, Capsule->GetScaledCapsuleHalfHeight());
+				RaycastEndLocation = TargetTop;
+			}
+
+			FHitResult HitResult;
+			FCollisionQueryParams Params(SCENE_QUERY_STAT(GA_LOS));
+			Params.AddIgnoredActor(Pawn);
+			Params.bTraceComplex = true;
+			bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, RaycastStartLocation, RaycastEndLocation, ECC_Visibility, Params);
+			bClearLOSNow = (!bHit || HitResult.GetActor() == Target);
+		}
+
+		TargetView->bClearLos = bClearLOSNow;
+
+		float RiseRate = 0.0f;
+		const float FallRate = 0.5f;
+		if (bClearLOSNow)
+		{
+			RiseRate = (VisionZone == EVisionZone::Front) ? 1.6f : 1.0f;
+			TargetView->Awareness = FMath::Clamp(TargetView->Awareness + RiseRate * GetWorld()->GetDeltaSeconds(), 0.f, 1.f);
+		}
+		else
+		{
+			TargetView->Awareness = FMath::Clamp(TargetView->Awareness - FallRate * GetWorld()->GetDeltaSeconds(), 0.f, 1.f);
+		}
 	}
 }
 
@@ -183,4 +235,27 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 const FTargetView* UGAPerceptionComponent::GetTargetView(FGuid TargetGuid) const
 {
 	return TargetMap.Find(TargetGuid);
+}
+
+bool UGAPerceptionComponent::TestVisibility(const FCellRef& Cell) const
+{
+	const AGAGridActor* Grid = Cast<AGAGridActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGAGridActor::StaticClass()));
+	if (!Grid) return false;
+
+	APawn* Pawn = GetOwnerPawn();
+	if (!Pawn) return false;
+
+	FVector RaycastStartLocation;
+	FRotator ViewRotation;
+	Pawn->GetActorEyesViewPoint(RaycastStartLocation, ViewRotation);
+
+	FVector CellLocation = Grid->GetCellPosition(Cell);
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(GA_LOS));
+	Params.AddIgnoredActor(Pawn);
+	Params.bTraceComplex = true;
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, RaycastStartLocation, CellLocation, ECC_Visibility, Params);
+	return !bHit;
 }

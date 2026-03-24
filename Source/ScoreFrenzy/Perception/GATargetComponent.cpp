@@ -137,10 +137,17 @@ void UGATargetComponent::TickComponent(float DeltaTime, enum ELevelTick TickType
 
 void UGATargetComponent::OccupancyMapSetPosition(const FVector& Position)
 {
-	// TODO PART 4
+	const AGAGridActor* Grid = GetGridActor();
+	if (Grid)
+	{
+		OccupancyMap = FGAGridMap(Grid, 0.0f);
 
-	// We've been observed to be in a given position
-	// Clear out all probability in the omap, and set the appropriate cell to P = 1.0
+		FCellRef TargetPositionInCellRef = Grid->GetCellRef(Position, true);
+		if (TargetPositionInCellRef.IsValid() && Grid->IsCellRefInBounds(TargetPositionInCellRef))
+		{
+			OccupancyMap.SetValue(TargetPositionInCellRef, 1.0f);
+		}
+	}
 }
 
 
@@ -151,37 +158,179 @@ void UGATargetComponent::OccupancyMapUpdate()
 	{
 		FGAGridMap VisibilityMap(Grid, 0.0f);
 
-		// TODO PART 4
-
-		// STEP 1: Build a visibility map, based on the perception components of the AIs in the world
-		// The visibility map is a simple map where each cell is either 0 (not currently visible to ANY perceiver) or 1 (currently visible to one or more perceivers).
-		// 
-
+		// STEP 1: Build visibility map
 		UGAPerceptionSystem* PerceptionSystem = UGAPerceptionSystem::GetPerceptionSystem(this);
 		if (PerceptionSystem)
 		{
 			TArray<TObjectPtr<UGAPerceptionComponent>>& PerceptionComponents = PerceptionSystem->GetAllPerceptionComponents();
 			for (UGAPerceptionComponent* PerceptionComponent : PerceptionComponents)
 			{
-				// Find visible cells for this perceiver.
-				// Reminder: Use the PerceptionComponent.VisionParameters when determining whether a cell is visible or not (in addition to a line trace).
-				// Suggestion: you might find it useful to add a UGAPerceptionComponent::TestVisibility method to the perception component.
+				APawn* Pawn = PerceptionComponent->GetOwnerPawn();
+				if (!Pawn) continue;
+
+				FVector RaycastStartLocation;
+				FRotator ViewRotation;
+				Pawn->GetActorEyesViewPoint(RaycastStartLocation, ViewRotation);
+
+				const float VisionDistance = PerceptionComponent->VisionParameters.VisionDistance;
+				const FCellRef Center = Grid->GetCellRef(RaycastStartLocation, /*bClamp=*/true);
+				const int32 Radius = FMath::CeilToInt(VisionDistance / Grid->CellScale);
+
+				for (int32 y = Center.Y - Radius; y <= (Center.Y + Radius); ++y)
+				{
+					for (int32 x = Center.X - Radius; x <= (Center.X + Radius); ++x)
+					{
+						const FCellRef Cell(x, y);
+						if (!Grid->IsCellRefInBounds(Cell)) continue;
+
+						const FVector CellLocation = Grid->GetCellPosition(Cell);
+						float Distance = FVector::Distance(CellLocation, RaycastStartLocation);
+						if ((Distance - Grid->CellScale / 2) > VisionDistance) continue;
+
+						FVector ForwardVector = Pawn->GetActorForwardVector();
+						FVector PerceiverToCell = CellLocation - RaycastStartLocation;
+						ForwardVector.Z = 0.0f; ForwardVector.Normalize();
+						PerceiverToCell.Z = 0.0f; PerceiverToCell.Normalize();
+						float CosineAngle = FVector::DotProduct(ForwardVector, PerceiverToCell.GetSafeNormal());
+						float CosineHalfAngle = FMath::Cos(FMath::DegreesToRadians(PerceptionComponent->VisionParameters.PeripheralVisionAngle * 0.5f));
+						if (CosineAngle < CosineHalfAngle) continue;
+
+						if (!PerceptionComponent->TestVisibility(Cell)) continue;
+
+						VisibilityMap.SetValue(Cell, 1.0f);
+					}
+				}
 			}
 		}
 
+		// STEP 2: Clear out probability in visible cells
+		float CulledProbability = 0.0f;
+		int32 MinX = OccupancyMap.GridBounds.MinX;
+		int32 MaxX = OccupancyMap.GridBounds.MaxX;
+		int32 MinY = OccupancyMap.GridBounds.MinY;
+		int32 MaxY = OccupancyMap.GridBounds.MaxY;
 
-		// STEP 2: Clear out the probability in the visible cells
+		for (int32 y = MinY; y <= MaxY; ++y)
+		{
+			for (int32 x = MinX; x <= MaxX; ++x)
+			{
+				const FCellRef Cell(x, y);
+				float Vis = 0.0f;
+				VisibilityMap.GetValue(Cell, Vis);
+				if (Vis == 1.0f)
+				{
+					float P = 0.0f;
+					OccupancyMap.GetValue(Cell, P);
+					CulledProbability += P;
+					OccupancyMap.SetValue(Cell, 0.0f);
+				}
+			}
+		}
 
-		// STEP 3: Renormalize the OMap, so that it's still a valid probability distribution
+		// STEP 3: Renormalize
+		if (CulledProbability < 1.0f)
+		{
+			for (int32 y = MinY; y <= MaxY; ++y)
+			{
+				for (int32 x = MinX; x <= MaxX; ++x)
+				{
+					const FCellRef Cell(x, y);
+					float Vis = 0.0f;
+					VisibilityMap.GetValue(Cell, Vis);
+					if (Vis == 0.0f)
+					{
+						float P = 0.0f;
+						OccupancyMap.GetValue(Cell, P);
+						OccupancyMap.SetValue(Cell, P / (1.0f - CulledProbability));
+					}
+				}
+			}
+		}
 
-		// STEP 4: Extract the highest-likelihood cell on the omap and refresh the LastKnownState.
+		// STEP 4: Extract highest-likelihood cell and refresh LastKnownState
+		float MaxProbability = 0.0f;
+		FCellRef MaxProbabilityCell;
+		for (int32 y = MinY; y <= MaxY; ++y)
+		{
+			for (int32 x = MinX; x <= MaxX; ++x)
+			{
+				const FCellRef Cell(x, y);
+				if (!Grid->IsCellRefInBounds(Cell)) continue;
+				if (!EnumHasAnyFlags(Grid->GetCellData(Cell), ECellData::CellDataTraversable)) continue;
+				float P = 0.0f;
+				OccupancyMap.GetValue(Cell, P);
+				if (P > MaxProbability)
+				{
+					MaxProbability = P;
+					MaxProbabilityCell = Cell;
+				}
+			}
+		}
+
+		FVector BestPos = Grid->GetCellPosition(MaxProbabilityCell);
+		LastKnownState.Set(BestPos, LastKnownState.Velocity);
 	}
-
 }
 
 
 void UGATargetComponent::OccupancyMapDiffuse()
 {
-	// TODO PART 4
-	// Diffuse the probability in the OMAP
+	const AGAGridActor* Grid = GetGridActor();
+	if (!Grid) return;
+
+	FGAGridMap Buffer = FGAGridMap(Grid, 0.0f);
+
+	int32 MinX = OccupancyMap.GridBounds.MinX;
+	int32 MaxX = OccupancyMap.GridBounds.MaxX;
+	int32 MinY = OccupancyMap.GridBounds.MinY;
+	int32 MaxY = OccupancyMap.GridBounds.MaxY;
+
+	const float Alpha = 0.01f;
+
+	for (int32 y = MinY; y <= MaxY; ++y)
+	{
+		for (int32 x = MinX; x <= MaxX; ++x)
+		{
+			const FCellRef Cell(x, y);
+			if (!Grid->IsCellRefInBounds(Cell)) continue;
+
+			float CellProbability = 0.0f;
+			OccupancyMap.GetValue(Cell, CellProbability);
+			if (CellProbability == 0.0f) continue;
+
+			float LeftProbability = CellProbability;
+
+			for (int32 CurrY = y - 1; CurrY <= y + 1; ++CurrY)
+			{
+				for (int32 CurrX = x - 1; CurrX <= x + 1; ++CurrX)
+				{
+					if (CurrX == x && CurrY == y) continue;
+
+					FCellRef Neighbor(CurrX, CurrY);
+					if (!Grid->IsCellRefInBounds(Neighbor)) continue;
+					if (!EnumHasAnyFlags(Grid->GetCellData(Neighbor), ECellData::CellDataTraversable)) continue;
+
+					float ProbabilityDiffusion;
+					if ((CurrY - y + CurrX - x) % 2 == 0)
+					{
+						ProbabilityDiffusion = Alpha * LeftProbability / FMath::Sqrt(2.0f);
+					}
+					else
+					{
+						ProbabilityDiffusion = Alpha * LeftProbability;
+					}
+					float NeighborP = 0.0f;
+					Buffer.GetValue(Neighbor, NeighborP);
+					Buffer.SetValue(Neighbor, NeighborP + ProbabilityDiffusion);
+					LeftProbability -= ProbabilityDiffusion;
+				}
+			}
+
+			float CellP = 0.0f;
+			Buffer.GetValue(Cell, CellP);
+			Buffer.SetValue(Cell, CellP + LeftProbability);
+		}
+	}
+
+	OccupancyMap = Buffer;
 }
