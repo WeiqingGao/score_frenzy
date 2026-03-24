@@ -10,6 +10,14 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateAICharacter, Log, All);
 
 UENUM(BlueprintType)
+enum class EDifficultyMode : uint8
+{
+	Easy    UMETA(DisplayName = "Easy"),
+	Medium  UMETA(DisplayName = "Medium"),
+	Hard    UMETA(DisplayName = "Hard"),
+};
+
+UENUM(BlueprintType)
 enum class EHealingState : uint8
 {
 	Normal      UMETA(DisplayName = "Normal"),      // Normal combat / patrol mode
