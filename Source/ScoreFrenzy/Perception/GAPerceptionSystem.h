@@ -30,6 +30,7 @@ class UGAPerceptionSystem : public UActorComponent
 	TArray<TObjectPtr<UGATargetComponent>>& GetAllTargetComponents() { return TargetComponents; }
 	TArray<TObjectPtr<UGAPerceptionComponent>>& GetAllPerceptionComponents() { return PerceptionComponents; }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Perception", meta=(WorldContext="WorldContextObject"))
 	static UGAPerceptionSystem* GetPerceptionSystem(const UObject* WorldContextObject);
 
 	// --- Alert Propagation ---
