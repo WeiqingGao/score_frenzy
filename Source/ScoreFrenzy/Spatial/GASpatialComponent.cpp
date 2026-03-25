@@ -178,11 +178,15 @@ bool UGASpatialComponent::ChoosePosition(bool PathfindToPosition, bool Debug)
 
 		Result = BestCell.IsValid();
 
-		if (Result && PathfindToPosition)
+		if (Result)
 		{
-			// (d) Build and begin following a path to the chosen cell
-			FVector BestPos = Grid->GetCellPosition(BestCell);
-			PathComponent->BuidPathFromDistanceMap(BestPos, BestCell, DistanceMap);
+			ChosenPosition = Grid->GetCellPosition(BestCell);
+
+			if (PathfindToPosition)
+			{
+				// (d) Build and begin following a path to the chosen cell
+				PathComponent->BuidPathFromDistanceMap(ChosenPosition, BestCell, DistanceMap);
+			}
 		}
 
 		

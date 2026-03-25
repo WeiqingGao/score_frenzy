@@ -47,6 +47,11 @@ class UGASpatialComponent : public UActorComponent
 	APawn *GetOwnerPawn() const;
 
 
+	// The world-space position selected by the most recent successful ChoosePosition call.
+	// Read this after ChoosePosition returns true.
+	UPROPERTY(BlueprintReadOnly)
+	FVector ChosenPosition;
+
 	// Core functionality
 
 	UFUNCTION(BlueprintCallable)
