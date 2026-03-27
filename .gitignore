@@ -4,4 +4,4 @@
 /.vs/**
 /Binaries/**
 /CLAUDE.md
-.gitignore
+/.gitignore

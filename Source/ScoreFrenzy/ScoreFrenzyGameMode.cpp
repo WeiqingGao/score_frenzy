@@ -12,3 +12,4 @@ AScoreFrenzyGameMode::AScoreFrenzyGameMode()
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
 }
+

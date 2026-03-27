@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "ScoreFrenzy/ScoreFrenzyGameMode.h"
 
 DEFINE_LOG_CATEGORY(LogTemplatePlayer);
 
@@ -127,4 +128,17 @@ void AGAPlayerCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+float AGAPlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+	class AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	Health -= ActualDamage;
+	if (Health <= 0.f)
+	{
+		Health = MaxHealth;
+		OnPlayerDeath();
+	}
+	return ActualDamage;
 }

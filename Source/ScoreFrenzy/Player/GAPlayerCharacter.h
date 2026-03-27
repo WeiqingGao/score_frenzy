@@ -46,7 +46,21 @@ class AGAPlayerCharacter : public ACharacter
 
 public:
 	AGAPlayerCharacter();
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health", meta = (ClampMin = 0))
+	float MaxHealth = 100.f;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Health")
+	float Health = 100.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Score", meta = (ClampMin = 0))
+	int32 DeathPenalty = 20;
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+		class AController* EventInstigator, AActor* DamageCauser) override;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void OnPlayerDeath();
 
 protected:
 
