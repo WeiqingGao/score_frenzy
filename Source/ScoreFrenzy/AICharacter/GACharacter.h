@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "../AILogic/Patrol/ScoutPatrolTypes.h"
 #include "Logging/LogMacros.h"
 #include "GACharacter.generated.h"
 
@@ -90,6 +91,16 @@ public:
 	// Returns true when Health / MaxHealth <= LowHealthThreshold.
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsLowHealth() const;
+	
+	// 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Patrol")
+	TArray<FScoutPatrolPoint> PatrolPoints;
+
+	UPROPERTY(BlueprintReadWrite, Category="Patrol")
+	int32 CurrentPatrolIndex = 0;
+
+	UPROPERTY(BlueprintReadWrite, Category="Patrol")
+	bool bPatrolInitialized = false;
 
 protected:
 	virtual void BeginPlay() override;
