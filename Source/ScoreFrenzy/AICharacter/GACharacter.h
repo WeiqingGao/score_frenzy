@@ -92,7 +92,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsLowHealth() const;
 	
-	// 
+	// Scout Patrol Branch
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Patrol")
 	TArray<FScoutPatrolPoint> PatrolPoints;
 
@@ -102,6 +102,13 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category="Patrol")
 	bool bPatrolInitialized = false;
 
+	// Group Behavior - Share Player's Position
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Group")
+	int32 SquadID = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Group")
+	bool bIsLeader = false;
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
