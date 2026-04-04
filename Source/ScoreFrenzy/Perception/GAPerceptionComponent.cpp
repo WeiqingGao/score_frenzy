@@ -301,6 +301,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		{
 			TargetView->Awareness = FMath::Clamp(TargetView->Awareness - FallRate * GetWorld()->GetDeltaSeconds(), 0.f, 1.f);
 		}
+
 	}
 }
 

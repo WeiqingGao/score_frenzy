@@ -37,16 +37,14 @@ struct FVisionParameters
 {
 	GENERATED_USTRUCT_BODY()
 
-	FVisionParameters() : FrontVisionAngle(60.0f), PeripheralVisionAngle(120.0f), VisionDistance(1000.0f) {}
+	FVisionParameters() : FrontVisionAngle(30.0f), PeripheralVisionAngle(120.f), VisionDistance(7000.0f) {}
 
-	// Half-angle of the tight front cone (degrees). Awareness rises fastest here.
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float FrontVisionAngle;
 
-	// Half-angle of the wider peripheral cone (degrees). Awareness rises slower here.
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float PeripheralVisionAngle;
-
+	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float VisionDistance;
 
@@ -98,23 +96,12 @@ class UGAPerceptionComponent : public UActorComponent
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FGuid, FTargetView> TargetMap;
 
-	// True once another AI (or game logic) has radioed this AI with the player's position.
-	// Distinct from Awareness: an AI can be alerted without having seen the player directly.
-	UPROPERTY(BlueprintReadWrite)
-	bool bIsAlerted;
-
-	// Called by GAPerceptionSystem::PropagateAlertToNearest when this AI is chosen as a recipient.
-	// Implement in Blueprint to write PlayerPosition into the AI's Blackboard.
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void OnAlertReceived(const FVector& PlayerPosition);
-
 	void UpdateAllTargetViews();
 	void UpdateTargetView(UGATargetComponent* TargetComponent);
 
 	// Return the FTargetView for the given target
 	const FTargetView * GetTargetView(FGuid TargetGuid) const;
-
-	// Returns true if the given grid cell is visible from this perceiver's eye point (LOS only, no cone check).
-	// Used by UGATargetComponent::OccupancyMapUpdate to build the visibility map.
+	
+	// helper function to test whether the given grid cell is visible from this perceiver
 	bool TestVisibility(const FCellRef& Cell) const;
 };

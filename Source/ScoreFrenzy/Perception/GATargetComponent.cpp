@@ -128,9 +128,12 @@ void UGATargetComponent::TickComponent(float DeltaTime, enum ELevelTick TickType
 	if (bDebugOccupancyMap)
 	{
 		AGAGridActor* Grid = GetGridActor();
-		Grid->DebugGridMap = OccupancyMap;
-		GridActor->RefreshDebugTexture();
-		GridActor->DebugMeshComponent->SetVisibility(true);
+		if (Grid)
+		{
+			Grid->DebugGridMap = OccupancyMap;
+			GridActor->RefreshDebugTexture();
+			GridActor->DebugMeshComponent->SetVisibility(true);
+		}
 	}
 }
 
@@ -328,6 +331,7 @@ void UGATargetComponent::OccupancyMapDiffuse()
 	// TODO PART 4
 	// Diffuse the probability in the OMAP
 	const AGAGridActor* Grid = GetGridActor();
+	if (!Grid) return;
 	FGAGridMap Buffer = FGAGridMap(Grid, 0.0f);
 	
 	int32 MinX = OccupancyMap.GridBounds.MinX;
