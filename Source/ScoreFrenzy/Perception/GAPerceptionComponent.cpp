@@ -71,10 +71,16 @@ UGATargetComponent* UGAPerceptionComponent::GetCurrentTarget() const
 	if (PerceptionSystem && PerceptionSystem->TargetComponents.Num() > 0)
 	{
 		UGATargetComponent* TargetComponent = PerceptionSystem->TargetComponents[0];
-		if (TargetComponent->IsKnown())
+		/*if (TargetComponent->IsKnown())
 		{
 			return PerceptionSystem->TargetComponents[0];
+		}*/
+		const FTargetView* TargetView = TargetMap.Find(TargetComponent->TargetGuid);
+		if (TargetView && TargetView->bClearLos && TargetView->Awareness >= 1.0f)
+		{
+			return TargetComponent;
 		}
+
 	}
 
 	return NULL;

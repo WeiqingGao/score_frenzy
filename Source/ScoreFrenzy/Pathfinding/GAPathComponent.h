@@ -5,6 +5,10 @@
 #include "ScoreFrenzy/Grid/GAGridActor.h"
 #include "GAPathComponent.generated.h"
 
+class UGASpatialFunction;
+struct FFunctionLayer;
+class AGAGridActor;
+class UGAPathComponent;
 
 
 USTRUCT(BlueprintType)

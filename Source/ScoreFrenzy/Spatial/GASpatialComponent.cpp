@@ -145,54 +145,103 @@ bool UGASpatialComponent::ChoosePosition(bool PathfindToPosition, bool Debug)
 		FGAGridMap DistanceMap(Grid, GridBox, FLT_MAX);
 
 
-		// (a) Run Dijkstra from the AI's current position to populate the distance map.
-		//     Cells that are unreachable remain at FLT_MAX.
-		// PathComponent->Dijkstra(OwnerPawn->GetActorLocation(), DistanceMap);
+		// ~~~ ASSIGNMENT 3 part 4-3 IMPLEMENTATION ~~~
 
-		// Evaluate and accumulate each layer of the spatial function
+		// (a) Run Dijkstra's to determine which cells we should even be evaluating (the GATHER phase)
+		// This fills DistanceMap with path distances from the AI's current position
+		FVector StartPoint = OwnerPawn->GetActorLocation();
+		bool bDijkstraSuccess = PathComponent->Dijkstra(StartPoint, DistanceMap);
+		
+		if (!bDijkstraSuccess)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("UGASpatialComponent::ChoosePosition - Dijkstra failed."));
+			return false;
+		}
+
+		// For each layer in the spatial function, evaluate and accumulate the layer in GridMap
+		// Note, only evaluate accessible cells found in step 1
 		for (const FFunctionLayer& Layer : SpatialFunction->Layers)
 		{
+			// figure out how to evaluate each layer type, and accumulate the value in the ScoreMap
 			EvaluateLayer(Layer, DistanceMap, ScoreMap);
 		}
 
-		// (c) Pick the highest-scoring reachable cell
-		Result = true;
-		// FCellRef BestCell = FCellRef::Invalid;
-		// float BestScore = -FLT_MAX;
-		// for (int32 Y = ScoreMap.GridBounds.MinY; Y < ScoreMap.GridBounds.MaxY; Y++)
-		// {
-		// 	for (int32 X = ScoreMap.GridBounds.MinX; X < ScoreMap.GridBounds.MaxX; X++)
-		// 	{
-		// 		FCellRef CellRef(X, Y);
-		// 		if (!EnumHasAllFlags(Grid->GetCellData(CellRef), ECellData::CellDataTraversable))
-		// 		{
-		// 			continue;
-		// 		}
-		// 		float Score = 0.0f;
-		// 		if (ScoreMap.GetValue(CellRef, Score) && Score > BestScore)
-		// 		{
-		// 			BestScore = Score;
-		// 			BestCell = CellRef;
-		// 		}
-		// 	}
-		// }
-		//
-		// Result = BestCell.IsValid();
-		//
-		// if (Result)
-		// {
-		// 	ChosenPosition = Grid->GetCellPosition(BestCell);
-		//
-		// 	if (PathfindToPosition)
-		// 	{
-		// 		// (d) Build and begin following a path to the chosen cell
-		// 		PathComponent->BuidPathFromDistanceMap(ChosenPosition, BestCell, DistanceMap);
-		// 	}
-		// }
-		if (PathfindToPosition)
+		// (b) Add some hysteresis (a score bonus) to the last tick's chosen cell
+		// This reduces jitter by giving a small bonus to the previously chosen position
+		if (bHasLastChosenCell && Grid->IsCellRefInBounds(LastChosenCell))
 		{
-			// (d) Go there! You should call your pathcomponent's UGAPathComponent::BuildPathFromDistanceMap() function
+			float CurrentScore = 0.0f;
+			if (ScoreMap.GetValue(LastChosenCell, CurrentScore))
+			{
+				// Add the hysteresis bias to discourage constantly switching positions
+				ScoreMap.SetValue(LastChosenCell, CurrentScore + HysteresisBias);
+			}
 		}
+
+		// (c) Pick the best cell in ScoreMap
+		// We need to find the cell with the highest score that is also reachable
+		FCellRef BestCell = FCellRef::Invalid;
+		float BestScore = -FLT_MAX;
+		const float INF = 1e30f;
+
+		for (int32 Y = ScoreMap.GridBounds.MinY; Y <= ScoreMap.GridBounds.MaxY; Y++)
+		{
+			for (int32 X = ScoreMap.GridBounds.MinX; X <= ScoreMap.GridBounds.MaxX; X++)
+			{
+				FCellRef CellRef(X, Y);
+				
+				// Only consider traversable cells
+				if (!EnumHasAllFlags(Grid->GetCellData(CellRef), ECellData::CellDataTraversable))
+				{
+					continue;
+				}
+				
+				// Only consider reachable cells (those with finite distance in the distance map)
+				float Distance = INF;
+				if (!DistanceMap.GetValue(CellRef, Distance) || Distance >= INF)
+				{
+					continue;
+				}
+				
+				// Get the score for this cell
+				float Score = 0.0f;
+				if (ScoreMap.GetValue(CellRef, Score))
+				{
+					if (Score > BestScore)
+					{
+						BestScore = Score;
+						BestCell = CellRef;
+					}
+				}
+			}
+		}
+
+		// Update the last chosen cell for hysteresis
+		if (BestCell.IsValid())
+		{
+			bHasLastChosenCell = true;
+			LastChosenCell = BestCell;
+			Result = true;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("UGASpatialComponent::ChoosePosition - No valid cell found."));
+			return false;
+		}
+
+		if (PathfindToPosition && BestCell.IsValid())
+		{
+			// (d) Go there! Call the pathcomponent's BuildPathFromDistanceMap() function
+			FVector EndPoint = Grid->GetCellPosition(BestCell);
+			bool bPathSuccess = PathComponent->BuidPathFromDistanceMap(EndPoint, BestCell, DistanceMap);
+			
+			if (!bPathSuccess)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("UGASpatialComponent::ChoosePosition - BuildPathFromDistanceMap failed."));
+				// Don't return false here - we still found a valid position, just couldn't path to it
+			}
+		}
+
 		
 		if (Debug)
 		{
@@ -217,203 +266,160 @@ void UGASpatialComponent::EvaluateLayer(const FFunctionLayer& Layer, const FGAGr
 {
 	APawn* OwnerPawn = GetOwnerPawn();
 	const AGAGridActor* Grid = GetGridActor();
+
+	// Get the player pawn (the target for range and LOS calculations)
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
 	
-	for (int32 Y = ScoreMap.GridBounds.MinY; Y < ScoreMap.GridBounds.MaxY; Y++)
+	// Early out if we need player but don't have one
+	if ((Layer.Input == SI_TargetRange || Layer.Input == SI_LOS) && PlayerPawn == NULL)
 	{
-		for (int32 X = ScoreMap.GridBounds.MinX; X < ScoreMap.GridBounds.MaxX; X++)
+		UE_LOG(LogTemp, Warning, TEXT("UGASpatialComponent::EvaluateLayer - No player pawn found for target-based input."));
+		return;
+	}
+
+	// Cache player location for efficiency
+	FVector PlayerLocation = PlayerPawn ? PlayerPawn->GetActorLocation() : FVector::ZeroVector;
+	
+	// Get world for raycasting
+	UWorld* World = GetWorld();
+	
+	// Constant for unreachable cells
+	const float INF = 1e30f;
+
+	for (int32 Y = ScoreMap.GridBounds.MinY; Y <= ScoreMap.GridBounds.MaxY; Y++)
+	{
+		for (int32 X = ScoreMap.GridBounds.MinX; X <= ScoreMap.GridBounds.MaxX; X++)
 		{
 			FCellRef CellRef(X, Y);
 
 			if (EnumHasAllFlags(Grid->GetCellData(CellRef), ECellData::CellDataTraversable))
 			{
-				// Assignment 3 part 4-4: evaluate me!
+				// ~~~ ASSIGNMENT 3 part 4-4 IMPLEMENTATION ~~~
+				
+				// Only evaluate cells that are reachable (have finite distance in the distance map)
+				float PathDistance = INF;
+				if (!DistanceMap.GetValue(CellRef, PathDistance) || PathDistance >= INF)
+				{
+					// Cell is not reachable, skip it
+					continue;
+				}
 
-				// First step is determine input value. Remember there are three possible inputs to handle:
-				// 	SI_None				UMETA(DisplayName = "None"),
-				//	SI_TargetRange		UMETA(DisplayName = "Target Range"),
-				//	SI_PathDistance		UMETA(DisplayName = "PathDistance"),
-				//	SI_LOS				UMETA(DisplayName = "Line Of Sight")
+				// First step: determine input value based on the layer's input type
+				float InputValue = 0.0f;
+				
+				switch (Layer.Input)
+				{
+					case SI_None:
+					{
+						// No input - constant value of 0
+						InputValue = 0.0f;
+						break;
+					}
+					
+					case SI_TargetRange:
+					{
+						// Euclidean distance from this cell to the player (target)
+						FVector CellPosition = Grid->GetCellPosition(CellRef);
+						InputValue = FVector::Dist(CellPosition, PlayerLocation);
+						break;
+					}
+					
+					case SI_PathDistance:
+					{
+						// Path distance from the AI's current position to this cell
+						// We already computed this via Dijkstra, it's stored in the DistanceMap
+						// Convert from cell units to world units (multiply by CellScale)
+						InputValue = PathDistance * Grid->CellScale;
+						break;
+					}
+					
+					case SI_LOS:
+					{
+						// Line of sight to the player
+						// Returns 1.0 if we have clear LOS, 0.0 if blocked
+						FVector Start = Grid->GetCellPosition(CellRef);
+						FVector End = PlayerLocation;
+						
+						// Offset the start position up a bit so we're not tracing from the ground
+						Start.Z += 50.0f;
+						
+						FHitResult HitResult;
+						FCollisionQueryParams Params;
+						Params.AddIgnoredActor(PlayerPawn);
+						Params.AddIgnoredActor(OwnerPawn);
+						
+						bool bHitSomething = World->LineTraceSingleByChannel(
+							HitResult, 
+							Start, 
+							End, 
+							ECollisionChannel::ECC_Visibility, 
+							Params
+						);
+						
+						// If we didn't hit anything, we have clear LOS
+						// InputValue = 1.0 means clear LOS, 0.0 means blocked
+						InputValue = bHitSomething ? 0.0f : 1.0f;
+						break;
+					}
+					
+					default:
+					{
+						InputValue = 0.0f;
+						break;
+					}
+				}
 
-				// Next, run it through the response curve using something like this
-				// float Value = 4.5f;
-				// float ModifiedValue = Layer.ResponseCurve.GetRichCurveConst()->Eval(Value, 0.0f);
+				// Next: run the input through the response curve
+				float ModifiedValue = 0.0f;
+				const FRichCurve* Curve = Layer.ResponseCurve.GetRichCurveConst();
+				if (Curve)
+				{
+					ModifiedValue = Curve->Eval(InputValue, 0.0f);
+				}
+				else
+				{
+					// No curve defined, just use the input directly
+					ModifiedValue = InputValue;
+				}
 
-				// Then add it's influence to the grid map, combining with the current value using one of the two operators
-				//	SO_None				UMETA(DisplayName = "None"),
-				//	SO_Add				UMETA(DisplayName = "Add"),			// add this layer to the accumulated buffer
-				//	SO_Multiply			UMETA(DisplayName = "Multiply")		// multiply this layer into the accumulated buffer
+				// Finally: combine with the current score using the specified operator
+				float CurrentScore = 0.0f;
+				ScoreMap.GetValue(CellRef, CurrentScore);
+				
+				float CombinedValue = CurrentScore;
+				
+				switch (Layer.Op)
+				{
+					case SO_None:
+					{
+						// No operation - don't modify the score
+						CombinedValue = CurrentScore;
+						break;
+					}
+					
+					case SO_Add:
+					{
+						// Add this layer's value to the accumulated score
+						CombinedValue = CurrentScore + ModifiedValue;
+						break;
+					}
+					
+					case SO_Multiply:
+					{
+						// Multiply this layer's value into the accumulated score
+						CombinedValue = CurrentScore * ModifiedValue;
+						break;
+					}
+					
+					default:
+					{
+						CombinedValue = CurrentScore;
+						break;
+					}
+				}
 
-				//ScoreMap.SetValue(CellRef, CombinedValue);
-
-
-				// HERE ARE SOME ADDITIONAL HINTS
-
-				// Here's how to get the player's pawn
-				// APawn *PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-
-				// Here's how to cast a ray
-
-				// UWorld* World = GetWorld();
-				// FHitResult HitResult;
-				// FCollisionQueryParams Params;
-				// FVector Start = Grid->GetCellPosition(CellRef);		// need a ray start
-				// FVector End = PlayerPawn->GetActorLocation();		// need a ray end
-				// Start.Z += 50.0f;									// offset by 50uus so 
-				// Add any actors that should be ignored by the raycast by calling
-				// Params.AddIgnoredActor(PlayerPawn);			// Probably want to ignore the player pawn
-				// Params.AddIgnoredActor(OwnerPawn);			// Probably want to ignore the AI themself
-				// bool bHitSomething = World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, Params);
-				// If bHitSomething is false, then we have a clear LOS
+				ScoreMap.SetValue(CellRef, CombinedValue);
 			}
 		}
 	}
 }
-	// UWorld* World = GetWorld();
-
-	// if (!Grid || !World)
-	// {
-		// return;
-	// }
-
-	// If this is a cover function, retrieve cover-specific distance / LOS constraints
-// 	const UGASpatialFunction_Cover* CoverFunc = nullptr;
-// 	if (SpatialFunctionReference.Get())
-// 	{
-// 		CoverFunc = Cast<UGASpatialFunction_Cover>(
-// 			SpatialFunctionReference->GetDefaultObject<UGASpatialFunction>()
-// 		);
-// 	}
-//
-// 	for (int32 Y = ScoreMap.GridBounds.MinY; Y < ScoreMap.GridBounds.MaxY; Y++)
-// 	{
-// 		for (int32 X = ScoreMap.GridBounds.MinX; X < ScoreMap.GridBounds.MaxX; X++)
-// 		{
-// 			FCellRef CellRef(X, Y);
-//
-// 			if (!EnumHasAllFlags(Grid->GetCellData(CellRef), ECellData::CellDataTraversable))
-// 			{
-// 				continue;
-// 			}
-//
-// 			float RawValue = 0.0f;
-// 			bool bSkipCell = false;
-//
-// 			switch (Layer.Input)
-// 			{
-// 			case SI_None:
-// 				RawValue = 1.0f;
-// 				break;
-//
-// 			case SI_TargetRange:
-// 			{
-// 				APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-// 				if (!PlayerPawn) { bSkipCell = true; break; }
-// 				FVector CellPos = Grid->GetCellPosition(CellRef);
-// 				RawValue = FVector::Dist(CellPos, PlayerPawn->GetActorLocation());
-// 				break;
-// 			}
-//
-// 			case SI_PathDistance:
-// 			{
-// 				float DistValue = 0.0f;
-// 				if (!DistanceMap.GetValue(CellRef, DistValue) || DistValue >= FLT_MAX)
-// 				{
-// 					bSkipCell = true;
-// 					break;
-// 				}
-// 				RawValue = DistValue;
-// 				break;
-// 			}
-//
-// 			case SI_LOS:
-// 			{
-// 				APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-// 				if (!PlayerPawn) { bSkipCell = true; break; }
-//
-// 				FVector CellPos = Grid->GetCellPosition(CellRef);
-// 				FVector PlayerPos = PlayerPawn->GetActorLocation();
-// 				CellPos.Z += 50.0f;
-//
-// 				FHitResult HitResult;
-// 				FCollisionQueryParams Params;
-// 				Params.AddIgnoredActor(PlayerPawn);
-// 				if (OwnerPawn) Params.AddIgnoredActor(OwnerPawn);
-//
-// 				bool bHit = World->LineTraceSingleByChannel(HitResult, CellPos, PlayerPos, ECC_Visibility, Params);
-// 				RawValue = bHit ? 0.0f : 1.0f;   // 1 = clear LOS to player (good for attacking)
-// 				break;
-// 			}
-//
-// 			case SI_CoverFromPlayer:
-// 			{
-// 				APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-// 				if (!PlayerPawn) { bSkipCell = true; break; }
-//
-// 				FVector CellPos = Grid->GetCellPosition(CellRef);
-// 				FVector PlayerPos = PlayerPawn->GetActorLocation();
-// 				CellPos.Z += 50.0f;
-//
-// 				// Apply distance constraints from GASpatialFunction_Cover if available
-// 				if (CoverFunc)
-// 				{
-// 					const float Dist = FVector::Dist(CellPos, PlayerPos);
-// 					if (Dist < CoverFunc->MinCoverDistance || Dist > CoverFunc->MaxCoverDistance)
-// 					{
-// 						bSkipCell = true;
-// 						break;
-// 					}
-// 				}
-//
-// 				FHitResult HitResult;
-// 				FCollisionQueryParams Params;
-// 				Params.AddIgnoredActor(PlayerPawn);
-// 				if (OwnerPawn) Params.AddIgnoredActor(OwnerPawn);
-//
-// 				bool bHit = World->LineTraceSingleByChannel(HitResult, CellPos, PlayerPos, ECC_Visibility, Params);
-//
-// 				// If peek-and-shoot mode is required but this cell is fully blocked, skip it
-// 				if (CoverFunc && CoverFunc->bRequireLOSToPlayer && bHit)
-// 				{
-// 					bSkipCell = true;
-// 					break;
-// 				}
-//
-// 				RawValue = bHit ? 1.0f : 0.0f;   // 1 = player cannot see this cell (good cover)
-// 				break;
-// 			}
-//
-// 			default:
-// 				bSkipCell = true;
-// 				break;
-// 			}
-//
-// 			if (bSkipCell)
-// 			{
-// 				continue;
-// 			}
-//
-// 			// Apply response curve
-// 			const float ModifiedValue = Layer.ResponseCurve.GetRichCurveConst()->Eval(RawValue, 0.0f);
-//
-// 			// Accumulate into ScoreMap using the configured operator
-// 			float CurrentValue = 0.0f;
-// 			ScoreMap.GetValue(CellRef, CurrentValue);
-//
-// 			float NewValue = CurrentValue;
-// 			switch (Layer.Op)
-// 			{
-// 			case SO_Add:
-// 				NewValue = CurrentValue + ModifiedValue;
-// 				break;
-// 			case SO_Multiply:
-// 				NewValue = CurrentValue * ModifiedValue;
-// 				break;
-// 			default:
-// 				NewValue = ModifiedValue;
-// 				break;
-// 			}
-//
-// 			ScoreMap.SetValue(CellRef, NewValue);
-// 		}
-// 	}
-// }
