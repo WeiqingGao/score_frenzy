@@ -262,6 +262,22 @@ bool UGASpatialComponent::ChoosePosition(bool PathfindToPosition, bool Debug)
 }
 
 
+bool UGASpatialComponent::GetLastChosenWorldPosition(FVector& OutPosition) const
+{
+	if (!bHasLastChosenCell)
+	{
+		return false;
+	}
+	const AGAGridActor* Grid = GetGridActor();
+	if (!Grid)
+	{
+		return false;
+	}
+	OutPosition = Grid->GetCellPosition(LastChosenCell);
+	return true;
+}
+
+
 void UGASpatialComponent::EvaluateLayer(const FFunctionLayer& Layer, const FGAGridMap& DistanceMap, FGAGridMap& ScoreMap) const
 {
 	APawn* OwnerPawn = GetOwnerPawn();
@@ -361,7 +377,47 @@ void UGASpatialComponent::EvaluateLayer(const FFunctionLayer& Layer, const FGAGr
 						InputValue = bHitSomething ? 0.0f : 1.0f;
 						break;
 					}
-					
+
+					case SI_CoverFromPlayer:
+					{
+						// Is this cell in cover FROM the player?
+						// Trace from the player toward the cell. If something blocks it, the cell is in cover (score 1.0).
+						// This is the inverse of SI_LOS: 1.0 = player cannot see this cell.
+						FVector Start = PlayerLocation;
+						FVector End = Grid->GetCellPosition(CellRef);
+						End.Z += 50.0f;	// match the SI_LOS height offset
+
+						// Apply distance constraints from GASpatialFunction_Cover if available
+						const UGASpatialFunction* SpatialFunction = SpatialFunctionReference ? SpatialFunctionReference->GetDefaultObject<UGASpatialFunction>() : nullptr;
+						const UGASpatialFunction_Cover* CoverFunction = Cast<UGASpatialFunction_Cover>(SpatialFunction);
+						if (CoverFunction)
+						{
+							float DistToPlayer = FVector::Dist(End, PlayerLocation);
+							if (DistToPlayer < CoverFunction->MinCoverDistance || DistToPlayer > CoverFunction->MaxCoverDistance)
+							{
+								InputValue = 0.0f;
+								break;
+							}
+						}
+
+						FHitResult HitResult;
+						FCollisionQueryParams Params;
+						Params.AddIgnoredActor(PlayerPawn);
+						Params.AddIgnoredActor(OwnerPawn);
+
+						bool bHitSomething = World->LineTraceSingleByChannel(
+							HitResult,
+							Start,
+							End,
+							ECollisionChannel::ECC_Visibility,
+							Params
+						);
+
+						// Blocked by geometry = good cover = 1.0
+						InputValue = bHitSomething ? 1.0f : 0.0f;
+						break;
+					}
+
 					default:
 					{
 						InputValue = 0.0f;

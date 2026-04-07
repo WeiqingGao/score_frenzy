@@ -58,6 +58,11 @@ class UGASpatialComponent : public UActorComponent
 	UFUNCTION(BlueprintCallable)
 	bool ChoosePosition(bool PathfindToPosition, bool Debug);
 
+	// Returns the world-space position of the last cell chosen by ChoosePosition().
+	// Returns false if ChoosePosition has not succeeded yet.
+	UFUNCTION(BlueprintCallable)
+	bool GetLastChosenWorldPosition(FVector& OutPosition) const;
+
 	void EvaluateLayer(const FFunctionLayer& Layer, const FGAGridMap& DistanceMap, FGAGridMap& GridMap) const;
 
 
