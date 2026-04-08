@@ -319,9 +319,11 @@ bool UGAPathComponent::Dijkstra(const FVector& StartPoint, FGAGridMap& DistanceM
 	// validates the StartCell
 	if (!StartCell.IsValid() || !Grid->IsCellRefInBounds(StartCell))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Dijkstra FAIL: StartCell invalid or out of grid bounds. StartPoint=(%f,%f,%f) StartCell=(%d,%d)"),
+			StartPoint.X, StartPoint.Y, StartPoint.Z, StartCell.X, StartCell.Y);
 		return false;
 	}
-	
+
 	// defines the traversable conditions: valid cell within the bounds with 'Traversable` flag
 	auto IsTraversable = [&](const FCellRef& Cell) -> bool
 	{
@@ -344,6 +346,11 @@ bool UGAPathComponent::Dijkstra(const FVector& StartPoint, FGAGridMap& DistanceM
 	// makes sure the start cell is traversable
 	if (!IsTraversable(StartCell))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Dijkstra FAIL: StartCell (%d,%d) not traversable. InBounds=%d, InDistMapBounds=%d, CellData=%d"),
+			StartCell.X, StartCell.Y,
+			Grid->IsCellRefInBounds(StartCell) ? 1 : 0,
+			DistanceMapOut.GridBounds.IsValidCell(StartCell) ? 1 : 0,
+			(int32)Grid->GetCellData(StartCell));
 		return false;
 	}
 	

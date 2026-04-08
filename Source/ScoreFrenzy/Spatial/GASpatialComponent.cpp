@@ -129,8 +129,12 @@ bool UGASpatialComponent::ChoosePosition(bool PathfindToPosition, bool Debug)
 
 	FBox2D Box(EForceInit::ForceInit);
 	FIntRect CellRect;
+	// GridSpaceBoundsToRect2D expects grid space, not world space.
+	// Grid space = World space - GridActor position + HalfExtents
 	FVector2D PawnLocation(OwnerPawn->GetActorLocation());
-	Box += PawnLocation;
+	FVector2D GridActorLocation2D(Grid->GetActorLocation());
+	FVector2D PawnLocationGridSpace = PawnLocation - GridActorLocation2D + Grid->HalfExtents;
+	Box += PawnLocationGridSpace;
 	Box = Box.ExpandBy(SampleDimensions / 2.0f);
 	if (Grid->GridSpaceBoundsToRect2D(Box, CellRect))
 	{
@@ -384,13 +388,14 @@ void UGASpatialComponent::EvaluateLayer(const FFunctionLayer& Layer, const FGAGr
 						// Trace from the player toward the cell. If something blocks it, the cell is in cover (score 1.0).
 						// This is the inverse of SI_LOS: 1.0 = player cannot see this cell.
 						FVector Start = PlayerLocation;
+						Start.Z += 50.0f;	// raise to approximate eye level so trace hits walls
 						FVector End = Grid->GetCellPosition(CellRef);
-						End.Z += 50.0f;	// match the SI_LOS height offset
+						End.Z += 50.0f;
 
-						// Apply distance constraints from GASpatialFunction_Cover if available
+						// Apply distance constraints only when MaxCoverDistance is explicitly set (> 0)
 						const UGASpatialFunction* SpatialFunction = SpatialFunctionReference ? SpatialFunctionReference->GetDefaultObject<UGASpatialFunction>() : nullptr;
 						const UGASpatialFunction_Cover* CoverFunction = Cast<UGASpatialFunction_Cover>(SpatialFunction);
-						if (CoverFunction)
+						if (CoverFunction && CoverFunction->MaxCoverDistance > 0.0f)
 						{
 							float DistToPlayer = FVector::Dist(End, PlayerLocation);
 							if (DistToPlayer < CoverFunction->MinCoverDistance || DistToPlayer > CoverFunction->MaxCoverDistance)
@@ -409,7 +414,7 @@ void UGASpatialComponent::EvaluateLayer(const FFunctionLayer& Layer, const FGAGr
 							HitResult,
 							Start,
 							End,
-							ECollisionChannel::ECC_Visibility,
+							ECollisionChannel::ECC_WorldStatic,
 							Params
 						);
 
