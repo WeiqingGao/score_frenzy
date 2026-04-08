@@ -85,9 +85,10 @@ void UGATargetComponent::TickComponent(float DeltaTime, enum ELevelTick TickType
 	UGAPerceptionSystem* PerceptionSystem = UGAPerceptionSystem::GetPerceptionSystem(this);
 	if (PerceptionSystem)
 	{
-		TArray<TObjectPtr<UGAPerceptionComponent>> &PerceptionComponents = PerceptionSystem->GetAllPerceptionComponents();
+		TArray<TObjectPtr<UGAPerceptionComponent>> PerceptionComponents = PerceptionSystem->GetAllPerceptionComponents();
 		for (UGAPerceptionComponent* PerceptionComponent : PerceptionComponents)
 		{
+			if (!PerceptionComponent || !IsValid(PerceptionComponent)) { continue; }
 			const FTargetView* TargetView = PerceptionComponent->GetTargetView(TargetGuid);
 			if (TargetView && (TargetView->Awareness >= 1.0f))
 			{
@@ -178,9 +179,10 @@ void UGATargetComponent::OccupancyMapUpdate()
 		UGAPerceptionSystem* PerceptionSystem = UGAPerceptionSystem::GetPerceptionSystem(this);
 		if (PerceptionSystem)
 		{
-			TArray<TObjectPtr<UGAPerceptionComponent>>& PerceptionComponents = PerceptionSystem->GetAllPerceptionComponents();
+			TArray<TObjectPtr<UGAPerceptionComponent>> PerceptionComponents = PerceptionSystem->GetAllPerceptionComponents();
 			for (UGAPerceptionComponent* PerceptionComponent : PerceptionComponents)
 			{
+				if (!PerceptionComponent || !IsValid(PerceptionComponent)) { continue; }
 				// Find visible cells for this perceiver.
 				// Reminder: Use the PerceptionComponent.VisionParameters when determining whether a cell is visible or not (in addition to a line trace).
 				// Suggestion: you might find it useful to add a UGAPerceptionComponent::TestVisibility method to the perception component.
@@ -190,6 +192,10 @@ void UGATargetComponent::OccupancyMapUpdate()
 
 				// 1. gets the vision's start point
 				APawn* Pawn = PerceptionComponent->GetOwnerPawn();
+				if (!Pawn || !IsValid(Pawn))
+				{
+					continue;
+				}
 				FVector RaycastStartLocation;
 				FRotator ViewRotation;
 				Pawn->GetActorEyesViewPoint(RaycastStartLocation, ViewRotation);
@@ -224,6 +230,7 @@ void UGATargetComponent::OccupancyMapUpdate()
 						if ((Distance - Grid->CellScale / 2) > VisionDistance) continue;
 						
 						// 4-2. tests if within the vision field
+						if (!IsValid(Pawn)) { break; }
 						// 4-2-1 gets the perceiver's current forward direction
 						FVector ForwardVector = Pawn->GetActorForwardVector();
 						// 4-2-2 gets the vector from AI to the target
@@ -290,9 +297,13 @@ void UGATargetComponent::OccupancyMapUpdate()
 				VisibilityMap.GetValue(Cell, CurrentValueInVisibilityMap);
 				if (CurrentValueInVisibilityMap == 0.0f)
 				{
-					float CurrentProbabilityInOccupancyMap;
-					OccupancyMap.GetValue(Cell,CurrentProbabilityInOccupancyMap);
-					OccupancyMap.SetValue(Cell, CurrentProbabilityInOccupancyMap / (1 - CulledProbability));
+					const float RemainingProbability = 1.0f - CulledProbability;
+					if (RemainingProbability > KINDA_SMALL_NUMBER)
+					{
+						float CurrentProbabilityInOccupancyMap;
+						OccupancyMap.GetValue(Cell, CurrentProbabilityInOccupancyMap);
+						OccupancyMap.SetValue(Cell, CurrentProbabilityInOccupancyMap / RemainingProbability);
+					}
 				}
 			}
 		}
@@ -319,8 +330,11 @@ void UGATargetComponent::OccupancyMapUpdate()
 			}
 		}
 		
-		FVector MaxProbabilityPositionInWorldSpace = Grid->GetCellPosition(MaxProbabilityPosition);
-		LastKnownState.Set(MaxProbabilityPositionInWorldSpace, LastKnownState.Velocity);
+		if (MaxProbabilityPosition.IsValid())
+		{
+			FVector MaxProbabilityPositionInWorldSpace = Grid->GetCellPosition(MaxProbabilityPosition);
+			LastKnownState.Set(MaxProbabilityPositionInWorldSpace, LastKnownState.Velocity);
+		}
 	}
 
 }

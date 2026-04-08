@@ -145,9 +145,10 @@ void UGAPerceptionComponent::UpdateAllTargetViews()
 	UGAPerceptionSystem* PerceptionSystem = UGAPerceptionSystem::GetPerceptionSystem(this);
 	if (PerceptionSystem)
 	{
-		TArray<TObjectPtr<UGATargetComponent>>& TargetComponents = PerceptionSystem->GetAllTargetComponents();
+		TArray<TObjectPtr<UGATargetComponent>> TargetComponents = PerceptionSystem->GetAllTargetComponents();
 		for (UGATargetComponent* TargetComponent : TargetComponents)
 		{
+			if (!TargetComponent || !IsValid(TargetComponent)) continue;
 			UpdateTargetView(TargetComponent);
 		}
 	}
@@ -155,7 +156,9 @@ void UGAPerceptionComponent::UpdateAllTargetViews()
 
 void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponent)
 {
-	// REMEMBER: the UGAPerceptionComponent is going to be attached to the controller, not the pawn. So we call this special accessor to 
+	if (!TargetComponent || !IsValid(TargetComponent)) return;
+
+	// REMEMBER: the UGAPerceptionComponent is going to be attached to the controller, not the pawn. So we call this special accessor to
 	// get the pawn that our controller is controlling
 	APawn* Pawn = GetOwnerPawn();
 	if (Pawn == NULL)
@@ -187,8 +190,9 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 
 		// YOUR CODE HERE
 		// 1. tests if within vision distance
-		// 1-1 gets the target's current location 
+		// 1-1 gets the target's current location
 		AActor* Target = TargetComponent->GetOwner();
+		if (!Target || !IsValid(Target)) return;
 		const FVector TargetLocation = Target->GetActorLocation();
 		// 1-2 gets the AI's current location
 		const FVector SelfLocation = Pawn->GetActorLocation();
@@ -243,21 +247,26 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 			// 3-2 gets the end point of raycast
 			// 3-2-1 gets the target's character
 			ACharacter* TargetCharacter = Cast<ACharacter>(Target);
-			FVector RaycastEndLocation;
+			FVector RaycastEndLocation = TargetLocation;
 			if (TargetCharacter)
 			{
 				// 3-2-2 makes the top of target's head as the end point,
 				//       since on this map, if the target is visible, the top of the target's head will also be visible
 				UCapsuleComponent* Capsule = TargetCharacter->GetCapsuleComponent();
-				// the middle position of the capsule 
-				FVector TargetCenter = Capsule->GetComponentLocation();
-				float TargetHalfHeight = Capsule->GetScaledCapsuleHalfHeight();
+				if (Capsule)
+				{
+					// the middle position of the capsule
+					FVector TargetCenter = Capsule->GetComponentLocation();
+					float TargetHalfHeight = Capsule->GetScaledCapsuleHalfHeight();
 
-				FVector TargetTop = TargetCenter + FVector(0,0,TargetHalfHeight);
-				RaycastEndLocation = TargetTop;
+					FVector TargetTop = TargetCenter + FVector(0,0,TargetHalfHeight);
+					RaycastEndLocation = TargetTop;
+				}
 			}
 
 			// 3-3 single line trace (raycast) by channel
+			UWorld* World = GetWorld();
+			if (!World) return;
 			FHitResult HitResult;
 			FCollisionQueryParams Params(SCENE_QUERY_STAT(GA_LOS));
 			// ignore itself
@@ -265,7 +274,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 			Params.bTraceComplex = true;
 			const ECollisionChannel Channel = ECC_Visibility;
 
-			const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, RaycastStartLocation, RaycastEndLocation, Channel, Params);
+			const bool bHit = World->LineTraceSingleByChannel(HitResult, RaycastStartLocation, RaycastEndLocation, Channel, Params);
 			
 			if (!bHit || HitResult.GetActor() == Target)
 			{
@@ -279,11 +288,14 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		
 		// 4.updates Awareness
 		TargetView->bClearLos = bClearLOSNow;
-		
+
+		UWorld* CurrentWorld = GetWorld();
+		if (!CurrentWorld) return;
+
 		// 4-1 sets the rise rate and fall rate
 		float RiseRate = 0.0f;
 		float FallRate = 0.5f;
-		
+
 		// 4-2 sets the rise rate based on vision zone, then clamps the awareness meter
 		if (bClearLOSNow)
 		{
@@ -301,11 +313,11 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 				default:
 					break;
 			}
-			TargetView->Awareness = FMath::Clamp(TargetView->Awareness + RiseRate * GetWorld()->GetDeltaSeconds(), 0.f, 1.f);
+			TargetView->Awareness = FMath::Clamp(TargetView->Awareness + RiseRate * CurrentWorld->GetDeltaSeconds(), 0.f, 1.f);
 		}
 		else
 		{
-			TargetView->Awareness = FMath::Clamp(TargetView->Awareness - FallRate * GetWorld()->GetDeltaSeconds(), 0.f, 1.f);
+			TargetView->Awareness = FMath::Clamp(TargetView->Awareness - FallRate * CurrentWorld->GetDeltaSeconds(), 0.f, 1.f);
 		}
 
 	}
@@ -321,10 +333,14 @@ bool UGAPerceptionComponent::TestVisibility(const FCellRef& Cell) const
 {
 	// // 1. tests if within vision distance
 	// // 1-1 transfer this cell's ref to world space since it is continuous, and thus more accurate
-	const AGAGridActor* Grid = Cast<AGAGridActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGAGridActor::StaticClass()));
+	UWorld* World = GetWorld();
+	if (!World) return false;
+	const AGAGridActor* Grid = Cast<AGAGridActor>(UGameplayStatics::GetActorOfClass(World, AGAGridActor::StaticClass()));
+	if (!Grid) return false;
 	const FVector thisLocation = Grid->GetCellPosition(Cell);
 	// // 1-2 gets the AI's current location
 	APawn* Pawn = GetOwnerPawn();
+	if (!Pawn || !IsValid(Pawn)) return false;
 	
 	// 3. LOS test
 	// 3-1 gets the starting point of raycast
@@ -340,7 +356,7 @@ bool UGAPerceptionComponent::TestVisibility(const FCellRef& Cell) const
 	Params.bTraceComplex = true;
 	const ECollisionChannel Channel = ECC_Visibility;
 
-	const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, RaycastStartLocation, thisLocation, Channel, Params);
-	
+	const bool bHit = World->LineTraceSingleByChannel(HitResult, RaycastStartLocation, thisLocation, Channel, Params);
+
 	return !bHit;
 }
