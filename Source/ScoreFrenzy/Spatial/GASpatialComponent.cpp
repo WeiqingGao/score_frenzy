@@ -4,7 +4,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Math/MathFwd.h"
 #include "GASpatialFunction.h"
-#include "GASpatialFunction_Cover.h"
 #include "ProceduralMeshComponent.h"
 
 
@@ -391,19 +390,6 @@ void UGASpatialComponent::EvaluateLayer(const FFunctionLayer& Layer, const FGAGr
 						Start.Z += 50.0f;	// raise to approximate eye level so trace hits walls
 						FVector End = Grid->GetCellPosition(CellRef);
 						End.Z += 50.0f;
-
-						// Apply distance constraints only when MaxCoverDistance is explicitly set (> 0)
-						const UGASpatialFunction* SpatialFunction = SpatialFunctionReference ? SpatialFunctionReference->GetDefaultObject<UGASpatialFunction>() : nullptr;
-						const UGASpatialFunction_Cover* CoverFunction = Cast<UGASpatialFunction_Cover>(SpatialFunction);
-						if (CoverFunction && CoverFunction->MaxCoverDistance > 0.0f)
-						{
-							float DistToPlayer = FVector::Dist(End, PlayerLocation);
-							if (DistToPlayer < CoverFunction->MinCoverDistance || DistToPlayer > CoverFunction->MaxCoverDistance)
-							{
-								InputValue = 0.0f;
-								break;
-							}
-						}
 
 						FHitResult HitResult;
 						FCollisionQueryParams Params;

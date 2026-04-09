@@ -344,14 +344,43 @@ bool UGAPathComponent::Dijkstra(const FVector& StartPoint, FGAGridMap& DistanceM
 	};
 
 	// makes sure the start cell is traversable
+	// If not, search nearby cells in expanding rings to find the closest traversable one
 	if (!IsTraversable(StartCell))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Dijkstra FAIL: StartCell (%d,%d) not traversable. InBounds=%d, InDistMapBounds=%d, CellData=%d"),
-			StartCell.X, StartCell.Y,
-			Grid->IsCellRefInBounds(StartCell) ? 1 : 0,
-			DistanceMapOut.GridBounds.IsValidCell(StartCell) ? 1 : 0,
-			(int32)Grid->GetCellData(StartCell));
-		return false;
+		UE_LOG(LogTemp, Warning, TEXT("Dijkstra: StartCell (%d,%d) not traversable (CellData=%d). Searching nearby..."),
+			StartCell.X, StartCell.Y, (int32)Grid->GetCellData(StartCell));
+
+		bool bFoundAlternative = false;
+		const int32 MaxSearchRadius = 5;
+		for (int32 Radius = 1; Radius <= MaxSearchRadius && !bFoundAlternative; Radius++)
+		{
+			for (int32 DY = -Radius; DY <= Radius && !bFoundAlternative; DY++)
+			{
+				for (int32 DX = -Radius; DX <= Radius && !bFoundAlternative; DX++)
+				{
+					// Only check cells on the current ring's perimeter
+					if (FMath::Abs(DX) != Radius && FMath::Abs(DY) != Radius)
+					{
+						continue;
+					}
+					FCellRef Candidate(StartCell.X + DX, StartCell.Y + DY);
+					if (IsTraversable(Candidate))
+					{
+						UE_LOG(LogTemp, Log, TEXT("Dijkstra: Using nearby traversable cell (%d,%d) instead of (%d,%d)"),
+							Candidate.X, Candidate.Y, StartCell.X, StartCell.Y);
+						StartCell = Candidate;
+						bFoundAlternative = true;
+					}
+				}
+			}
+		}
+
+		if (!bFoundAlternative)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Dijkstra FAIL: No traversable cell found near (%d,%d) within radius %d"),
+				StartCell.X, StartCell.Y, MaxSearchRadius);
+			return false;
+		}
 	}
 	
 	// initializes DistanceMapOut
